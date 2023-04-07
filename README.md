@@ -1,4 +1,4 @@
-![github01](doc/github01.png)
+![github2](doc/github2.png)
 
 **English** | [中文](https://p3terx.com/archives/build-openwrt-with-github-actions.html)
 
