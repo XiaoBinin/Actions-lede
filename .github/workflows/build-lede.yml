@@ -34,6 +34,7 @@ env:
   CONFIG_LTS: configs/lede/target/lts.config
   CONFIG_PLUS: configs/lede/target/plus.config
   CONFIG_R2S: configs/lede/target/r2s.config
+  CONFIG_R2C: configs/lede/target/r2c.config
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true

@@ -1,7 +1,7 @@
 Index: b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts	2023-03-19 10:28:02.924421690 +0800
-+++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts	2023-03-19 10:28:02.920421688 +0800
+--- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts	2023-04-08 12:12:39.917291360 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts	2023-04-08 12:12:39.913291327 +0800
 @@ -493,3 +493,16 @@
  &usb_host0_ohci {
  	status = "okay";
@@ -21,9 +21,9 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
 +};
 Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts	2023-03-19 10:28:02.924421690 +0800
-+++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts	2023-03-19 10:33:56.819341668 +0800
-@@ -40,10 +40,16 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts	2023-04-08 12:12:39.917291360 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts	2023-04-08 12:17:38.623748672 +0800
+@@ -40,6 +40,11 @@
  			compatible = "ethernet-phy-id4f51.e91b",
  				     "ethernet-phy-ieee802.3-c22";
  			reg = <0>;
@@ -35,15 +35,10 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts
  			pinctrl-0 = <&eth_phy_reset_pin>;
  			pinctrl-names = "default";
  			reset-assert-us = <15000>;
- 			reset-deassert-us = <50000>;
-+			keep-clkout-on;
- 			reset-gpios = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;
- 		};
- 	};
 Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts	2023-03-19 10:28:02.924421690 +0800
-+++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts	2023-03-19 10:33:16.771794698 +0800
+--- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts	2023-04-08 12:12:39.917291360 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts	2023-04-08 12:18:50.120334486 +0800
 @@ -4,6 +4,15 @@
  / {
  	model = "Xunlong Orange Pi R1 Plus";
@@ -69,7 +64,7 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
  
  	flash@0 {
  		compatible = "jedec,spi-nor";
-@@ -30,10 +39,20 @@
+@@ -30,8 +39,8 @@
  	rockchip,pins = <3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
  };
  
@@ -80,22 +75,10 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
  };
  
  &wan_led {
- 	label = "orangepi-r1-plus:green:wan";
- };
-+
-+&rk805 {
-+	interrupt-parent = <&gpio1>;
-+	interrupts = <RK_PD0 IRQ_TYPE_LEVEL_LOW>;
-+};
-+
-+&sdmmc {
-+	cap-mmc-highspeed;
-+	max-frequency = <150000000>;
-+};
 Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2023-03-19 10:28:02.924421690 +0800
-+++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2023-03-19 10:35:47.654224161 +0800
+--- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2023-04-08 12:12:39.917291360 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2023-04-08 12:12:39.917291360 +0800
 @@ -109,50 +109,61 @@
  		compatible = "operating-points-v2";
  		opp-shared;
@@ -261,8 +244,8 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  		snps,dis_enblslpm_quirk;
 Index: b/drivers/phy/rockchip/Kconfig
 ===================================================================
---- a/drivers/phy/rockchip/Kconfig	2023-03-19 10:28:02.924421690 +0800
-+++ b/drivers/phy/rockchip/Kconfig	2023-03-19 10:28:02.920421688 +0800
+--- a/drivers/phy/rockchip/Kconfig	2023-04-08 12:12:39.917291360 +0800
++++ b/drivers/phy/rockchip/Kconfig	2023-04-08 12:12:39.917291360 +0800
 @@ -48,6 +48,15 @@ config PHY_ROCKCHIP_INNO_USB2
  	help
  	  Support for Rockchip USB2.0 PHY with Innosilicon IP block.
@@ -281,8 +264,8 @@ Index: b/drivers/phy/rockchip/Kconfig
  	depends on (ARCH_ROCKCHIP || COMPILE_TEST) && OF
 Index: b/drivers/phy/rockchip/Makefile
 ===================================================================
---- a/drivers/phy/rockchip/Makefile	2023-03-19 10:28:02.924421690 +0800
-+++ b/drivers/phy/rockchip/Makefile	2023-03-19 10:28:02.920421688 +0800
+--- a/drivers/phy/rockchip/Makefile	2023-04-08 12:12:39.917291360 +0800
++++ b/drivers/phy/rockchip/Makefile	2023-04-08 12:12:39.917291360 +0800
 @@ -6,6 +6,7 @@ obj-$(CONFIG_PHY_ROCKCHIP_INNO_CSIDPHY)
  obj-$(CONFIG_PHY_ROCKCHIP_INNO_DSIDPHY)	+= phy-rockchip-inno-dsidphy.o
  obj-$(CONFIG_PHY_ROCKCHIP_INNO_HDMI)	+= phy-rockchip-inno-hdmi.o
@@ -293,9 +276,24 @@ Index: b/drivers/phy/rockchip/Makefile
  obj-$(CONFIG_PHY_ROCKCHIP_SNPS_PCIE3)	+= phy-rockchip-snps-pcie3.o
 Index: b/drivers/net/phy/motorcomm.c
 ===================================================================
---- a/drivers/net/phy/motorcomm.c	2023-03-19 10:28:02.336421303 +0800
-+++ b/drivers/net/phy/motorcomm.c	2023-03-19 10:30:54.769656270 +0800
-@@ -1518,6 +1518,13 @@ static int yt8531_config_init(struct phy
+--- a/drivers/net/phy/motorcomm.c	2023-04-08 12:12:39.917291360 +0800
++++ b/drivers/net/phy/motorcomm.c	2023-04-08 12:16:24.295138824 +0800
+@@ -1487,6 +1487,14 @@ static int yt8521_config_init(struct phy
+ 		if (ret < 0)
+ 			goto err_restore_page;
+ 	}
++
++	/* LED0: Unused/Off, LED1: Link, LED2: Activity, 8Hz */
++	ytphy_write_ext(phydev, 0xa00b, 0xe004);
++	ytphy_write_ext(phydev, 0xa00c, 0);
++	ytphy_write_ext(phydev, 0xa00d, 0x2600);
++	ytphy_write_ext(phydev, 0xa00e, 0x0070);
++	ytphy_write_ext(phydev, 0xa00f, 0x000a);
++
+ err_restore_page:
+ 	return phy_restore_page(phydev, old_page, ret);
+ }
+@@ -1518,6 +1526,13 @@ static int yt8531_config_init(struct phy
  			return ret;
  	}
  
@@ -309,3 +307,19 @@ Index: b/drivers/net/phy/motorcomm.c
  	return 0;
  }
  
+Index: b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2c.dts
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2c.dts	2023-04-08 12:12:39.661289246 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2c.dts	2023-04-08 12:13:31.993721181 +0800
+@@ -27,6 +27,11 @@
+ 			compatible = "ethernet-phy-id0000.011a",
+ 				     "ethernet-phy-ieee802.3-c22";
+ 			reg = <3>;
++
++			motorcomm,clk-out-frequency-hz = <125000000>;
++			motorcomm,keep-pll-enabled;
++			motorcomm,auto-sleep-disabled;
++
+ 			interrupt-parent = <&gpio2>;
+ 			interrupts = <RK_PC4 IRQ_TYPE_EDGE_FALLING>;
+ 			pinctrl-0 = <&eth_phy_reset_pin>;
