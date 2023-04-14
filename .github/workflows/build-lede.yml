@@ -17,8 +17,8 @@ permissions:
 on:
   repository_dispatch:
   workflow_dispatch:
-  schedule:
-   - cron: 0 21 * * *
+  #schedule:
+   #- cron: 0 21 * * *
    #   分,时,日,月,星期。每天22时执行一次 (UTC时间)
   
 env:
@@ -43,7 +43,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: 检查
@@ -54,7 +54,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         chmod +x $FREE_DISK_SH && $FREE_DISK_SH
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
         chmod +x $ENV_SH && $ENV_SH
@@ -149,14 +149,14 @@ jobs:
 
     - name: 上传 bin 目录
       uses: actions/upload-artifact@main
-      if: steps.compile1.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile4.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: 整理文件
       id: organize
-      if: steps.compile1.outputs.status == 'success'
+      if: steps.compile4.outputs.status == 'success'
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *.bin
@@ -176,7 +176,7 @@ jobs:
 
     - name: 生成发布标签
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && steps.compile1.outputs.status == 'success' && !cancelled()
+      if: env.UPLOAD_RELEASE == 'true' && steps.compile4.outputs.status == 'success' && !cancelled()
       run: |
         echo -e "ℹ ext4 和 squashfs 两种分区，不折腾推荐squashfs。\n" >> release.txt
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
@@ -194,7 +194,7 @@ jobs:
 
     - name: 删除旧发布的固件
       uses: dev-drprasad/delete-older-releases@v0.2.1
-      if: steps.compile1.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: steps.compile4.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
         keep_latest: 5
         delete_tags: true
