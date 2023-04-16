@@ -17,9 +17,9 @@ permissions:
 on:
   repository_dispatch:
   workflow_dispatch:
-  #schedule:
-   #- cron: 0 21 * * *
-   #   分,时,日,月,星期。每天22时执行一次 (UTC时间)
+  schedule:
+   - cron: 0 21 * * 0,2,4
+   #   分,时,日,月,星期。每周一,三,五 21时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -32,10 +32,7 @@ env:
   UBOOT_PATCH: patchs/lede/uboot/9999-add-missing-parameters-for-LTS.patch
   TARGET_PATCH: patchs/lede/target/9998-add-missing-parameters-for-LTS.patch
   USB3_FILE: patchs/lede/target/files/phy-rockchip-inno-usb3.c
-  CONFIG_LTS: configs/lede/target/lts.config
-  CONFIG_PLUS: configs/lede/target/plus.config
-  CONFIG_R2S: configs/lede/target/r2s.config
-  CONFIG_R2C: configs/lede/target/r2c.config
+  CONFIGS: configs/rockchip.config
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
@@ -84,10 +81,10 @@ jobs:
         ./scripts/feeds update -a && ./scripts/feeds install -a
         chmod +x $GITHUB_WORKSPACE/$DIY_SH && $GITHUB_WORKSPACE/$DIY_SH
 
-    - name: 导入LTS补丁和配置 & 下载文件
+    - name: 导入补丁和配置 & 下载文件
       run: |
         [ -e files ] && mv files openwrt/files
-        [ -e $CONFIG_LTS ] && mv $CONFIG_LTS openwrt/.config
+        [ -e $CONFIGS ] && mv $CONFIGS openwrt/.config
         [ -e $R8152_PATCH ] && mv $R8152_PATCH openwrt/package/lean/r8152/patches/
         [ -e $UBOOT_PATCH ] && mv $UBOOT_PATCH openwrt/package/boot/uboot-rockchip/patches
         [ -e $TARGET_PATCH ] && mv $TARGET_PATCH openwrt/target/linux/rockchip/patches-5.15
@@ -99,7 +96,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译LTS固件中
+    - name: 编译固件中
       id: compile1
       run: |
         cd openwrt
@@ -108,39 +105,6 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: 导入PLUS配置 & 编译PLUS固件
-      if: steps.compile1.outputs.status == 'success'
-      id: compile2
-      run: |
-        [ -e $CONFIG_PLUS ] && mv $CONFIG_PLUS openwrt/.config
-        cd openwrt
-        make defconfig
-        echo -e "$(($(nproc)+1)) thread compile"
-        make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: 导入R2S配置 & 编译R2S固件
-      if: steps.compile2.outputs.status == 'success'
-      id: compile3
-      run: |
-        [ -e $CONFIG_R2S ] && mv $CONFIG_R2S openwrt/.config
-        cd openwrt
-        make defconfig
-        echo -e "$(($(nproc)+1)) thread compile"
-        make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: 导入R2C配置 & 编译R2C固件
-      if: steps.compile3.outputs.status == 'success'
-      id: compile4
-      run: |
-        [ -e $CONFIG_R2C ] && mv $CONFIG_R2C openwrt/.config
-        cd openwrt
-        make defconfig
-        echo -e "$(($(nproc)+1)) thread compile"
-        make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 空间使用情况
