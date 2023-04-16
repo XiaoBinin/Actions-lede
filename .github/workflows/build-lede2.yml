@@ -23,7 +23,7 @@ on:
   
 env:
   REPO_URL: https://github.com/XiaoBinin/lede
-  REPO_BRANCH: boot2
+  REPO_BRANCH: master
   FREE_DISK_SH: scripts/free_disk_space.sh
   ENV_SH: scripts/environment.sh
   DIY_SH: scripts/lede/patch.sh
