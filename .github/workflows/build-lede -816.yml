@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: build-lede
+name: build-lede-816
 
 permissions:
   contents: write
@@ -18,8 +18,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-   - cron: 0 21 * * 0,2,4
-   #   分,时,日,月,星期。每周一,三,五 21时执行一次 (UTC时间)
+   - cron: 0 21 * * 2,5
+   #   分,时,日,月,星期。每周三,六 21时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -30,7 +30,7 @@ env:
   CLASH_CORE: scripts/lede/preset-clash-core.sh
   R8152_PATCH: patchs/lede/r8152/100-add-LED-configuration-from-OF.patch
   UBOOT_PATCH: patchs/lede/uboot/9999-add-missing-parameters-for-LTS.patch
-  TARGET_PATCH: patchs/lede/target/9998-add-missing-parameters-for-LTS.patch
+  TARGET_PATCH: patchs/lede/target/9816-add-missing-parameters-for-LTS.patch
   USB3_FILE: patchs/lede/target/files/phy-rockchip-inno-usb3.c
   CONFIGS: configs/rockchip.config
   UPLOAD_BIN_DIR: false
@@ -139,7 +139,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile1.outputs.status == 'success' && !cancelled()
       run: |
-        echo -e "ℹ ext4 和 squashfs 两种分区，不折腾推荐squashfs。\n" >> release.txt
+        echo -e "ℹ rk3328 cpu降频816版本，如果也不稳定那就换货。\n" >> release.txt
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
