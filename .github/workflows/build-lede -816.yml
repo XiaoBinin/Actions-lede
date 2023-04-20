@@ -30,7 +30,7 @@ env:
   CLASH_CORE: scripts/lede/preset-clash-core.sh
   R8152_PATCH: patchs/lede/r8152/100-add-LED-configuration-from-OF.patch
   UBOOT_PATCH: patchs/lede/uboot/9999-add-missing-parameters-for-LTS.patch
-  TARGET_PATCH: patchs/lede/target/9816-add-missing-parameters-for-LTS.patch
+  TARGET_PATCH: patchs/lede/target/9990-add-missing-parameters-for-LTS.patch
   USB3_FILE: patchs/lede/target/files/phy-rockchip-inno-usb3.c
   CONFIGS: configs/rockchip.config
   UPLOAD_BIN_DIR: false
@@ -51,7 +51,7 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
       run: |
         chmod +x $FREE_DISK_SH && $FREE_DISK_SH
-        sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
         chmod +x $ENV_SH && $ENV_SH
@@ -85,6 +85,7 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         [ -e $CONFIGS ] && mv $CONFIGS openwrt/.config
+        cat configs/packages.txt >> openwrt/.config
         [ -e $R8152_PATCH ] && mv $R8152_PATCH openwrt/package/lean/r8152/patches/
         [ -e $UBOOT_PATCH ] && mv $UBOOT_PATCH openwrt/package/boot/uboot-rockchip/patches
         [ -e $TARGET_PATCH ] && mv $TARGET_PATCH openwrt/target/linux/rockchip/patches-5.15

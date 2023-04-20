@@ -32,17 +32,6 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
  
  	flash@0 {
  		compatible = "jedec,spi-nor";
-@@ -30,8 +39,8 @@
- 	rockchip,pins = <3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
- };
- 
--&uart1 {
--	status = "okay";
-+&uart2 {
-+	status = "disabled";
- };
- 
- &wan_led {
 Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
 ===================================================================
 --- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi
@@ -186,4 +175,17 @@ Index: b/drivers/net/phy/motorcomm.c
 +
  	return 0;
  }
-
+ 
+Index: b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+@@ -105,7 +105,7 @@
+ 		pcie-eth@0,0 {
+ 			compatible = "pci10ec,8168";
+ 			reg = <0x000000 0 0 0 0>;
+-
++			local-mac-address = [ 00 00 00 00 00 00 ];
+ 			realtek,led-data = <0x870>;
+ 		};
+ 	};

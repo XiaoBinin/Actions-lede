@@ -1,7 +1,7 @@
 Index: b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
+--- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts	2023-04-19 13:59:10.250342999 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts	2023-04-19 13:59:10.246343024 +0800
 @@ -493,3 +493,16 @@
  &usb_host0_ohci {
  	status = "okay";
@@ -21,9 +21,9 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2s.dts
 +};
 Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
-+++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
-@@ -12,7 +21,7 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts	2023-04-19 13:59:10.250342999 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts	2023-04-19 14:00:48.697754364 +0800
+@@ -12,7 +12,7 @@
  
  &spi0 {
  	max-freq = <48000000>;
@@ -32,38 +32,11 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus.dts
  
  	flash@0 {
  		compatible = "jedec,spi-nor";
-@@ -30,8 +39,8 @@
- 	rockchip,pins = <3 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
- };
- 
--&uart1 {
--	status = "okay";
-+&uart2 {
-+	status = "disabled";
- };
- 
- &wan_led {
 Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
 ===================================================================
---- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
-@@ -109,52 +109,11 @@
- 		compatible = "operating-points-v2";
- 		opp-shared;
- 
--		opp-408000000 {
--			opp-hz = /bits/ 64 <408000000>;
--			opp-microvolt = <950000>;
--			clock-latency-ns = <40000>;
--			opp-suspend;
--		};
--		opp-600000000 {
--			opp-hz = /bits/ 64 <600000000>;
--			opp-microvolt = <950000>;
--			clock-latency-ns = <40000>;
--		};
-		opp-816000000 {
- 			opp-hz = /bits/ 64 <816000000>;
+--- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2023-04-19 13:59:10.250342999 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2023-04-19 13:59:44.666135877 +0800
+@@ -125,36 +125,6 @@
  			opp-microvolt = <1000000>;
  			clock-latency-ns = <40000>;
  		};
@@ -100,7 +73,7 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  	};
  
  	analog_sound: analog-sound {
-@@ -875,6 +886,48 @@
+@@ -875,6 +845,48 @@
  		};
  	};
  
@@ -149,7 +122,7 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  	sdmmc: mmc@ff500000 {
  		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
  		reg = <0x0 0xff500000 0x0 0x4000>;
-@@ -1015,6 +1068,8 @@
+@@ -1015,6 +1027,8 @@
  		clock-names = "ref_clk", "suspend_clk",
  			      "bus_clk";
  		dr_mode = "otg";
@@ -160,8 +133,8 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  		snps,dis_enblslpm_quirk;
 Index: b/drivers/phy/rockchip/Kconfig
 ===================================================================
---- a/drivers/phy/rockchip/Kconfig
-+++ b/drivers/phy/rockchip/Kconfig
+--- a/drivers/phy/rockchip/Kconfig	2023-04-19 13:59:10.250342999 +0800
++++ b/drivers/phy/rockchip/Kconfig	2023-04-19 13:59:10.246343024 +0800
 @@ -48,6 +48,15 @@ config PHY_ROCKCHIP_INNO_USB2
  	help
  	  Support for Rockchip USB2.0 PHY with Innosilicon IP block.
@@ -180,8 +153,8 @@ Index: b/drivers/phy/rockchip/Kconfig
  	depends on (ARCH_ROCKCHIP || COMPILE_TEST) && OF
 Index: b/drivers/phy/rockchip/Makefile
 ===================================================================
---- a/drivers/phy/rockchip/Makefile
-+++ b/drivers/phy/rockchip/Makefile
+--- a/drivers/phy/rockchip/Makefile	2023-04-19 13:59:10.250342999 +0800
++++ b/drivers/phy/rockchip/Makefile	2023-04-19 13:59:10.246343024 +0800
 @@ -6,6 +6,7 @@ obj-$(CONFIG_PHY_ROCKCHIP_INNO_CSIDPHY)
  obj-$(CONFIG_PHY_ROCKCHIP_INNO_DSIDPHY)	+= phy-rockchip-inno-dsidphy.o
  obj-$(CONFIG_PHY_ROCKCHIP_INNO_HDMI)	+= phy-rockchip-inno-hdmi.o
@@ -192,8 +165,8 @@ Index: b/drivers/phy/rockchip/Makefile
  obj-$(CONFIG_PHY_ROCKCHIP_SNPS_PCIE3)	+= phy-rockchip-snps-pcie3.o
 Index: b/drivers/net/phy/motorcomm.c
 ===================================================================
---- a/drivers/net/phy/motorcomm.c
-+++ b/drivers/net/phy/motorcomm.c
+--- a/drivers/net/phy/motorcomm.c	2023-04-19 13:59:10.250342999 +0800
++++ b/drivers/net/phy/motorcomm.c	2023-04-19 13:59:10.246343024 +0800
 @@ -1487,6 +1487,14 @@ static int yt8521_config_init(struct phy
  		if (ret < 0)
  			goto err_restore_page;
@@ -222,4 +195,17 @@ Index: b/drivers/net/phy/motorcomm.c
 +
  	return 0;
  }
-
+ 
+Index: b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts	2023-04-19 13:59:09.794345753 +0800
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts	2023-04-19 14:07:31.743436867 +0800
+@@ -105,7 +105,7 @@
+ 		pcie-eth@0,0 {
+ 			compatible = "pci10ec,8168";
+ 			reg = <0x000000 0 0 0 0>;
+-
++			local-mac-address = [ 00 00 00 00 00 00 ];
+ 			realtek,led-data = <0x870>;
+ 		};
+ 	};
