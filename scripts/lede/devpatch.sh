@@ -11,7 +11,7 @@ git clone -b master https://github.com/pymumu/smartdns.git package/smartdns
 #git clone -b master https://github.com/fw876/helloworld.git package/ssrp
 #passwall
 git clone -b luci --depth 1 https://github.com/xiaorouji/openwrt-passwall.git package/pw
-#git clone -b packages https://github.com/xiaorouji/openwrt-passwall.git package/pwages
+git clone -b packages --depth 1 https://github.com/xiaorouji/openwrt-passwall.git package/pwages
 #passwall2
 git clone -b main https://github.com/xiaorouji/openwrt-passwall2.git package/pw2
 #mosdns
