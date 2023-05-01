@@ -26,7 +26,7 @@ env:
   REPO_BRANCH: master-dev
   FREE_DISK_SH: scripts/free_disk_space.sh
   ENV_SH: scripts/environment.sh
-  DIY_SH: scripts/lede/patch.sh
+  DIY_SH: scripts/lede/devpatch.sh
   CLASH_CORE: scripts/lede/preset-clash-core.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
@@ -63,6 +63,8 @@ jobs:
       run: |
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd openwrt
+        echo "src-git ssrp https://github.com/fw876/helloworld.git" >> ./feeds.conf.default
 
     - name: 开启缓存
       uses: klever1988/cachewrtbuild@main
