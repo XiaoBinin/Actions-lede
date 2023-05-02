@@ -4,6 +4,8 @@
 rm -rf ./feeds/packages/net/smartdns
 
 #克隆插件
+#adguardhome
+git clone -b main https://github.com/XiaoBinin/luci-app-adguardhome.git package/adg
 #smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/lucismartdns
 git clone -b master https://github.com/pymumu/smartdns.git package/smartdns

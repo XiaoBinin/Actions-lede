@@ -17,6 +17,8 @@ sed -i '$a CONFIG_PHY_ROCKCHIP_INNO_USB3=y' target/linux/rockchip/armv8/config-5
 rm -rf ./feeds/packages/net/smartdns
 
 #克隆插件
+#adguardhome
+git clone -b main https://github.com/XiaoBinin/luci-app-adguardhome.git package/adg
 #smartdns
 git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/lucismartdns
 git clone -b master https://github.com/pymumu/smartdns.git package/smartdns
@@ -24,7 +26,7 @@ git clone -b master https://github.com/pymumu/smartdns.git package/smartdns
 #git clone -b master https://github.com/fw876/helloworld.git package/ssrp
 #passwall
 git clone -b luci --depth 1 https://github.com/xiaorouji/openwrt-passwall.git package/pw
-#git clone -b packages https://github.com/xiaorouji/openwrt-passwall.git package/pwages
+git clone -b packages https://github.com/xiaorouji/openwrt-passwall.git package/pwages
 #passwall2
 git clone -b main https://github.com/xiaorouji/openwrt-passwall2.git package/pw2
 #mosdns
