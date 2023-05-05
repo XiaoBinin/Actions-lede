@@ -13,6 +13,6 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus-lts=y
 #rootfs
 CONFIG_TARGET_ROOTFS_EXT4FS=n
 #kmod
-# CONFIG_PACKAGE_kmod-usb-net-rtl8152 is not set
-CONFIG_PACKAGE_kmod-usb-net-rtl8152-vendor=y
+CONFIG_PACKAGE_kmod-usb-net-rtl8152=y
+# CONFIG_PACKAGE_kmod-usb-net-rtl8152-vendor is not set
 
