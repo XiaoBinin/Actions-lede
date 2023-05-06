@@ -18,19 +18,24 @@ rm -rf ./feeds/packages/net/smartdns
 
 #克隆插件
 rm -rf feeds/ssrp/ipt2socks
+
+mkdir package/small
+pushd package/small
 #adguardhome
-git clone -b main https://github.com/XiaoBinin/luci-app-adguardhome.git package/adg
+git clone -b main https://github.com/XiaoBinin/luci-app-adguardhome.git
 #smartdns
-git clone -b lede https://github.com/pymumu/luci-app-smartdns.git package/lucismartdns
-git clone -b master https://github.com/pymumu/smartdns.git package/smartdns
+git clone -b lede --depth 1 https://github.com/pymumu/luci-app-smartdns.git
+git clone -b master https://github.com/pymumu/smartdns.git
 #ssrp
-#git clone -b master https://github.com/fw876/helloworld.git package/ssrp
+#git clone -b master https://github.com/fw876/helloworld.git
 #passwall
-git clone -b luci --depth 1 https://github.com/xiaorouji/openwrt-passwall.git package/pw
-git clone -b packages https://github.com/xiaorouji/openwrt-passwall.git package/pwages
+git clone -b luci --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
+git clone -b packages https://github.com/xiaorouji/openwrt-passwall.git
 #passwall2
-git clone -b main https://github.com/xiaorouji/openwrt-passwall2.git package/pw2
+git clone -b main https://github.com/xiaorouji/openwrt-passwall2.git
 #mosdns
-git clone -b v5 --depth 1 https://github.com/sbwml/luci-app-mosdns.git package/mosdns
+git clone -b v5 --depth 1 https://github.com/sbwml/luci-app-mosdns.git
 #openclash
-git clone -b master --depth 1 https://github.com/vernesong/OpenClash.git package/opclash
+git clone -b master --depth 1 https://github.com/vernesong/OpenClash.git
+
+popd
