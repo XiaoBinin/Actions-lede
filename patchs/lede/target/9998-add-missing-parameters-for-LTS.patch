@@ -183,7 +183,7 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  		snps,dis-u2-freeclk-exists-quirk;
  		snps,dis_u2_susphy_quirk;
  		snps,dis_u3_susphy_quirk;
-+		snps,xhci-trb-ent-quirk;
++		snps,dis-u3-autosuspend-quirk;
  		status = "disabled";
  	};
  
@@ -310,7 +310,16 @@ Index: b/drivers/usb/dwc3/core.c
 ===================================================================
 --- a/drivers/usb/dwc3/core.c
 +++ b/drivers/usb/dwc3/core.c
-@@ -1412,6 +1412,8 @@ static void dwc3_get_properties(struct d
+@@ -1394,6 +1394,8 @@ static void dwc3_get_properties(struct d
+ 				"snps,lfps_filter_quirk");
+ 	dwc->rx_detect_poll_quirk = device_property_read_bool(dev,
+ 				"snps,rx_detect_poll_quirk");
++	dwc->dis_u3_autosuspend_quirk = device_property_read_bool(dev,
++				"snps,dis-u3-autosuspend-quirk");
+ 	dwc->dis_u3_susphy_quirk = device_property_read_bool(dev,
+ 				"snps,dis_u3_susphy_quirk");
+ 	dwc->dis_u2_susphy_quirk = device_property_read_bool(dev,
+@@ -1412,6 +1414,8 @@ static void dwc3_get_properties(struct d
  				"snps,dis-del-phy-power-chg-quirk");
  	dwc->dis_tx_ipgap_linecheck_quirk = device_property_read_bool(dev,
  				"snps,dis-tx-ipgap-linecheck-quirk");
@@ -323,7 +332,15 @@ Index: b/drivers/usb/dwc3/core.h
 ===================================================================
 --- a/drivers/usb/dwc3/core.h
 +++ b/drivers/usb/dwc3/core.h
-@@ -1074,6 +1074,9 @@ struct dwc3_scratchpad_array {
+@@ -1060,6 +1060,7 @@ struct dwc3_scratchpad_array {
+  * @del_phy_power_chg_quirk: set if we enable delay phy power change quirk
+  * @lfps_filter_quirk: set if we enable LFPS filter quirk
+  * @rx_detect_poll_quirk: set if we enable rx_detect to polling lfps quirk
++ * @dis_u3_autosuspend_quirk: set if the we disable usb3 autosuspend
+  * @dis_u3_susphy_quirk: set if we disable usb3 suspend phy
+  * @dis_u2_susphy_quirk: set if we disable usb2 suspend phy
+  * @dis_enblslpm_quirk: set if we clear enblslpm in GUSB2PHYCFG,
+@@ -1074,6 +1075,9 @@ struct dwc3_scratchpad_array {
   *			change quirk.
   * @dis_tx_ipgap_linecheck_quirk: set if we disable u2mac linestate
   *			check during HS transmit.
@@ -333,7 +350,15 @@ Index: b/drivers/usb/dwc3/core.h
   * @resume-hs-terminations: Set if we enable quirk for fixing improper crc
   *			generation after resume from suspend.
   * @parkmode_disable_ss_quirk: set if we need to disable all SuperSpeed
-@@ -1289,6 +1292,7 @@ struct dwc3 {
+@@ -1280,6 +1284,7 @@ struct dwc3 {
+ 	unsigned		del_phy_power_chg_quirk:1;
+ 	unsigned		lfps_filter_quirk:1;
+ 	unsigned		rx_detect_poll_quirk:1;
++	unsigned		dis_u3_autosuspend_quirk:1;
+ 	unsigned		dis_u3_susphy_quirk:1;
+ 	unsigned		dis_u2_susphy_quirk:1;
+ 	unsigned		dis_enblslpm_quirk:1;
+@@ -1289,6 +1294,7 @@ struct dwc3 {
  	unsigned		dis_u2_freeclk_exists_quirk:1;
  	unsigned		dis_del_phy_power_chg_quirk:1;
  	unsigned		dis_tx_ipgap_linecheck_quirk:1;
@@ -350,11 +375,17 @@ Index: b/drivers/usb/dwc3/host.c
  int dwc3_host_init(struct dwc3 *dwc)
  {
 -	struct property_entry	props[4];
-+	struct property_entry	props[5];
++	struct property_entry	props[6];
  	struct platform_device	*xhci;
  	int			ret, irq;
  	struct resource		*res;
-@@ -92,6 +92,9 @@ int dwc3_host_init(struct dwc3 *dwc)
+@@ -89,9 +89,15 @@ int dwc3_host_init(struct dwc3 *dwc)
+ 
+ 	memset(props, 0, sizeof(struct property_entry) * ARRAY_SIZE(props));
+ 
++	if (dwc->dis_u3_autosuspend_quirk)
++		props[prop_idx++] = PROPERTY_ENTRY_BOOL("usb3-dis-autosuspend");
++
  	if (dwc->usb3_lpm_capable)
  		props[prop_idx++] = PROPERTY_ENTRY_BOOL("usb3-lpm-capable");
  
@@ -368,12 +399,15 @@ Index: b/drivers/usb/host/xhci-plat.c
 ===================================================================
 --- a/drivers/usb/host/xhci-plat.c
 +++ b/drivers/usb/host/xhci-plat.c
-@@ -312,6 +312,9 @@ static int xhci_plat_probe(struct platfo
+@@ -312,6 +312,12 @@ static int xhci_plat_probe(struct platfo
  		if (device_property_read_bool(tmpdev, "quirk-broken-port-ped"))
  			xhci->quirks |= XHCI_BROKEN_PORT_PED;
  
 +		if (device_property_read_bool(tmpdev, "xhci-trb-ent-quirk"))
 +			xhci->quirks |= XHCI_TRB_ENT_QUIRK;
++
++		if (device_property_read_bool(tmpdev, "usb3-dis-autosuspend"))
++			xhci->quirks |= XHCI_DIS_AUTOSUSPEND;
 +
  		device_property_read_u32(tmpdev, "imod-interval-ns",
  					 &xhci->imod_interval);
@@ -443,11 +477,86 @@ Index: b/drivers/usb/host/xhci.h
  #define TRB_MAX_BUFF_SIZE	(1 << TRB_MAX_BUFF_SHIFT)
  /* How much data is left before the 64KB boundary? */
  #define TRB_BUFF_LEN_UP_TO_BOUNDARY(addr)	(TRB_MAX_BUFF_SIZE - \
-@@ -1906,6 +1910,7 @@ struct xhci_hcd {
+@@ -1906,6 +1910,8 @@ struct xhci_hcd {
  #define XHCI_EP_CTX_BROKEN_DCS	BIT_ULL(42)
  #define XHCI_SUSPEND_RESUME_CLKS	BIT_ULL(43)
  #define XHCI_RESET_TO_DEFAULT	BIT_ULL(44)
++#define XHCI_DIS_AUTOSUSPEND	BIT_ULL(62)
 +#define XHCI_TRB_ENT_QUIRK	BIT_ULL(63)
  
  	unsigned int		num_active_eps;
  	unsigned int		limit_active_eps;
+Index: b/drivers/usb/core/hub.c
+===================================================================
+--- a/drivers/usb/core/hub.c
++++ b/drivers/usb/core/hub.c
+@@ -1833,7 +1833,8 @@ static int hub_probe(struct usb_interfac
+ 	 * bus_resume methods.
+ 	 */
+ 	if (hdev->parent) {		/* normal device */
+-		usb_enable_autosuspend(hdev);
++		if (!(hdev->parent->quirks & USB_QUIRK_AUTO_SUSPEND))
++			usb_enable_autosuspend(hdev);
+ 	} else {			/* root hub */
+ 		const struct hc_driver *drv = bus_to_hcd(hdev->bus)->driver;
+ 
+@@ -5637,7 +5638,24 @@ static void port_event(struct usb_hub *h
+ 		} else {
+ 			usb_unlock_port(port_dev);
+ 			usb_lock_device(udev);
+-			usb_reset_device(udev);
++
++			/**
++			 * Some special SoCs (e.g. rk322xh) USB3 PHY lose the
++			 * ability to detect a disconnection when USB3 device
++			 * plug out, fortunately, it can detect port link state
++			 * change here, so we can do soft disconnect according
++			 * to the PLC here.
++			 *
++			 * And we only need to do the soft disconnect for root
++			 * hub. In addition, we just reuse the autosuspend quirk
++			 * but not add a new quirk for this issue. Because this
++			 * issue always occurs with autosuspend problem.
++			 */
++			if (!hub->hdev->parent && (hdev->quirks &
++			    USB_QUIRK_AUTO_SUSPEND))
++				usb_remove_device(udev);
++			else
++				usb_reset_device(udev);
+ 			usb_unlock_device(udev);
+ 			usb_lock_port(port_dev);
+ 			connect_change = 0;
+Index: b/drivers/usb/host/xhci.c
+===================================================================
+--- a/drivers/usb/host/xhci.c
++++ b/drivers/usb/host/xhci.c
+@@ -18,6 +18,7 @@
+ #include <linux/slab.h>
+ #include <linux/dmi.h>
+ #include <linux/dma-mapping.h>
++#include <linux/usb/quirks.h>
+ 
+ #include "xhci.h"
+ #include "xhci-trace.h"
+@@ -5317,6 +5318,9 @@ int xhci_gen_setup(struct usb_hcd *hcd,
+ 		/* xHCI private pointer was set in xhci_pci_probe for the second
+ 		 * registered roothub.
+ 		 */
++		if (xhci->quirks & XHCI_DIS_AUTOSUSPEND)
++			xhci->shared_hcd->self.root_hub->quirks |=
++				USB_QUIRK_AUTO_SUSPEND;
+ 		return 0;
+ 	}
+ 
+Index: b/include/linux/usb/quirks.h
+===================================================================
+--- a/include/linux/usb/quirks.h
++++ b/include/linux/usb/quirks.h
+@@ -72,4 +72,7 @@
+ /* device has endpoints that should be ignored */
+ #define USB_QUIRK_ENDPOINT_IGNORE		BIT(15)
+ 
++/* device can't support auto suspend function */
++#define USB_QUIRK_AUTO_SUSPEND			BIT(16)
++
+ #endif /* __LINUX_USB_QUIRKS_H */
