@@ -25,6 +25,8 @@ mkdir package/small
 pushd package/small
 #adguardhome
 git clone -b main https://github.com/XiaoBinin/luci-app-adguardhome.git
+#lucky
+git clone -b main  https://github.com/sirpdboy/luci-app-lucky.git
 #smartdns
 git clone -b lede --depth 1 https://github.com/pymumu/luci-app-smartdns.git
 git clone -b master https://github.com/pymumu/smartdns.git
