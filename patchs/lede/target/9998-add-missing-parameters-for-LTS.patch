@@ -179,11 +179,13 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  		phy_type = "utmi_wide";
  		snps,dis-del-phy-power-chg-quirk;
  		snps,dis_enblslpm_quirk;
-@@ -1022,6 +1060,7 @@
+@@ -1022,6 +1060,9 @@
  		snps,dis-u2-freeclk-exists-quirk;
  		snps,dis_u2_susphy_quirk;
  		snps,dis_u3_susphy_quirk;
 +		snps,dis-u3-autosuspend-quirk;
++		snps,xhci-slow-suspend-quirk;
++		snps,xhci-trb-ent-quirk;
  		status = "disabled";
  	};
  
@@ -319,8 +321,12 @@ Index: b/drivers/usb/dwc3/core.c
  	dwc->dis_u3_susphy_quirk = device_property_read_bool(dev,
  				"snps,dis_u3_susphy_quirk");
  	dwc->dis_u2_susphy_quirk = device_property_read_bool(dev,
-@@ -1412,6 +1414,8 @@ static void dwc3_get_properties(struct d
+@@ -1410,8 +1412,12 @@ static void dwc3_get_properties(struct d
+ 				"snps,dis-u2-freeclk-exists-quirk");
+ 	dwc->dis_del_phy_power_chg_quirk = device_property_read_bool(dev,
  				"snps,dis-del-phy-power-chg-quirk");
++	dwc->xhci_slow_suspend_quirk = device_property_read_bool(dev,
++				"snps,xhci-slow-suspend-quirk");
  	dwc->dis_tx_ipgap_linecheck_quirk = device_property_read_bool(dev,
  				"snps,dis-tx-ipgap-linecheck-quirk");
 +	dwc->xhci_trb_ent_quirk = device_property_read_bool(dev,
@@ -340,8 +346,13 @@ Index: b/drivers/usb/dwc3/core.h
   * @dis_u3_susphy_quirk: set if we disable usb3 suspend phy
   * @dis_u2_susphy_quirk: set if we disable usb2 suspend phy
   * @dis_enblslpm_quirk: set if we clear enblslpm in GUSB2PHYCFG,
-@@ -1074,6 +1075,9 @@ struct dwc3_scratchpad_array {
+@@ -1072,8 +1073,14 @@ struct dwc3_scratchpad_array {
+  *			provide a free-running PHY clock.
+  * @dis_del_phy_power_chg_quirk: set if we disable delay phy power
   *			change quirk.
++ * @xhci_slow_suspend_quirk: set if need an extraordinary delay to wait
++ *			for xHC enter the Halted state after the Run/Stop
++ *			(R/S) bit is cleared to '0'.
   * @dis_tx_ipgap_linecheck_quirk: set if we disable u2mac linestate
   *			check during HS transmit.
 + * @xhci_trb_ent_quirk: set if need to enable the Evaluate Next TRB(ENT)
@@ -350,7 +361,7 @@ Index: b/drivers/usb/dwc3/core.h
   * @resume-hs-terminations: Set if we enable quirk for fixing improper crc
   *			generation after resume from suspend.
   * @parkmode_disable_ss_quirk: set if we need to disable all SuperSpeed
-@@ -1280,6 +1284,7 @@ struct dwc3 {
+@@ -1280,6 +1287,7 @@ struct dwc3 {
  	unsigned		del_phy_power_chg_quirk:1;
  	unsigned		lfps_filter_quirk:1;
  	unsigned		rx_detect_poll_quirk:1;
@@ -358,9 +369,11 @@ Index: b/drivers/usb/dwc3/core.h
  	unsigned		dis_u3_susphy_quirk:1;
  	unsigned		dis_u2_susphy_quirk:1;
  	unsigned		dis_enblslpm_quirk:1;
-@@ -1289,6 +1294,7 @@ struct dwc3 {
+@@ -1288,7 +1296,9 @@ struct dwc3 {
+ 	unsigned		dis_rxdet_inp3_quirk:1;
  	unsigned		dis_u2_freeclk_exists_quirk:1;
  	unsigned		dis_del_phy_power_chg_quirk:1;
++	unsigned		xhci_slow_suspend_quirk:1;
  	unsigned		dis_tx_ipgap_linecheck_quirk:1;
 +	unsigned		xhci_trb_ent_quirk:1;
  	unsigned		resume_hs_terminations:1;
@@ -379,7 +392,7 @@ Index: b/drivers/usb/dwc3/host.c
  	struct platform_device	*xhci;
  	int			ret, irq;
  	struct resource		*res;
-@@ -89,9 +89,15 @@ int dwc3_host_init(struct dwc3 *dwc)
+@@ -89,12 +89,21 @@ int dwc3_host_init(struct dwc3 *dwc)
  
  	memset(props, 0, sizeof(struct property_entry) * ARRAY_SIZE(props));
  
@@ -395,11 +408,17 @@ Index: b/drivers/usb/dwc3/host.c
  	if (dwc->usb2_lpm_disable)
  		props[prop_idx++] = PROPERTY_ENTRY_BOOL("usb2-lpm-disable");
  
++	if (dwc->xhci_slow_suspend_quirk)
++		props[prop_idx++] = PROPERTY_ENTRY_BOOL("xhci-slow-suspend");
++
+ 	/**
+ 	 * WORKAROUND: dwc3 revisions <=3.00a have a limitation
+ 	 * where Port Disable command doesn't work.
 Index: b/drivers/usb/host/xhci-plat.c
 ===================================================================
 --- a/drivers/usb/host/xhci-plat.c
 +++ b/drivers/usb/host/xhci-plat.c
-@@ -312,6 +312,12 @@ static int xhci_plat_probe(struct platfo
+@@ -312,6 +312,15 @@ static int xhci_plat_probe(struct platfo
  		if (device_property_read_bool(tmpdev, "quirk-broken-port-ped"))
  			xhci->quirks |= XHCI_BROKEN_PORT_PED;
  
@@ -408,6 +427,9 @@ Index: b/drivers/usb/host/xhci-plat.c
 +
 +		if (device_property_read_bool(tmpdev, "usb3-dis-autosuspend"))
 +			xhci->quirks |= XHCI_DIS_AUTOSUSPEND;
++
++		if (device_property_read_bool(tmpdev, "xhci-slow-suspend"))
++			xhci->quirks |= XHCI_SLOW_SUSPEND;
 +
  		device_property_read_u32(tmpdev, "imod-interval-ns",
  					 &xhci->imod_interval);
