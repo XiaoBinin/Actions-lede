@@ -17,6 +17,7 @@ sed -i '$a CONFIG_PHY_ROCKCHIP_INNO_USB3=y' target/linux/rockchip/armv8/config-5
 rm -rf ./feeds/packages/net/smartdns
 
 #克隆插件
+rm -rf feeds/ssrp/ipt2socks
 #adguardhome
 git clone -b main https://github.com/XiaoBinin/luci-app-adguardhome.git package/adg
 #smartdns
