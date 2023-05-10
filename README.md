@@ -1,3 +1,6 @@
+rk3328平台：nanopi-r2c/r2s、orangepi-r1-plus/lts
+rk3399平台：nanopi-r4s/r4se
+rk3568平台：nanopi-r5c/r5s、hinlink_opc-h66k/h68k/h69k、fastrhino_r66s/r68s、mrkaio-m68s/m68s-plus
 ![github3](doc/github3.png)
 ![design](doc/design.png)
 
