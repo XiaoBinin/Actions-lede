@@ -179,16 +179,6 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
  		phy_type = "utmi_wide";
  		snps,dis-del-phy-power-chg-quirk;
  		snps,dis_enblslpm_quirk;
-@@ -1022,6 +1060,9 @@
- 		snps,dis-u2-freeclk-exists-quirk;
- 		snps,dis_u2_susphy_quirk;
- 		snps,dis_u3_susphy_quirk;
-+		snps,dis-u3-autosuspend-quirk;
-+		snps,xhci-slow-suspend-quirk;
-+		snps,xhci-trb-ent-quirk;
- 		status = "disabled";
- 	};
- 
 Index: b/drivers/phy/rockchip/Kconfig
 ===================================================================
 --- a/drivers/phy/rockchip/Kconfig
