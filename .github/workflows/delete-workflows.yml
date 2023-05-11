@@ -1,6 +1,6 @@
 name: Delete Old Workflows 删除旧工作流
 
-permissions: read-all|write-all
+permissions: write-all
 
 on:
   workflow_dispatch:
