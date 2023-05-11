@@ -1,5 +1,6 @@
 name: Delete Old Workflows 删除旧工作流
 
+permissions: read-all|write-all
 
 on:
   workflow_dispatch:
@@ -16,4 +17,5 @@ jobs:
         with:
           token: ${{ secrets.TOKEN_GITHUB }}
           repository: ${{ github.repository }}
-          retain_days: 5
+          retain_days: 1
+          keep_minimum_runs: 2
