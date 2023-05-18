@@ -1,7 +1,8 @@
 #!/bin/bash
 
-#删除feeds中自带的smartdns
+#删除feeds中的插件
 rm -rf ./feeds/packages/net/smartdns
+rm -rf ./feeds/luci/applications/luci-app-mosdns
 
 #克隆插件
 rm -rf feeds/ssrp/ipt2socks

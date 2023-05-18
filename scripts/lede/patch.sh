@@ -13,8 +13,9 @@ sed -i 's/kmod-usb-net-rtl8152/kmod-usb-net-rtl8152-vendor/g' target/linux/rockc
 #添加内核配置
 sed -i '$a CONFIG_PHY_ROCKCHIP_INNO_USB3=y' target/linux/rockchip/armv8/config-5.15
 
-#删除feeds中自带的smartdns
+#删除feeds中的插件
 rm -rf ./feeds/packages/net/smartdns
+rm -rf ./feeds/luci/applications/luci-app-mosdns
 
 #克隆插件
 rm -rf feeds/ssrp/ipt2socks
