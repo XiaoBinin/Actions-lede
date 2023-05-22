@@ -97,24 +97,61 @@ Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
 ===================================================================
 --- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
-@@ -142,19 +142,14 @@
+@@ -111,50 +111,45 @@
+ 
+ 		opp-408000000 {
+ 			opp-hz = /bits/ 64 <408000000>;
+-			opp-microvolt = <950000>;
++			opp-microvolt = <950000 950000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 			opp-suspend;
+ 		};
+ 		opp-600000000 {
+ 			opp-hz = /bits/ 64 <600000000>;
+-			opp-microvolt = <950000>;
++			opp-microvolt = <950000 950000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-816000000 {
+ 			opp-hz = /bits/ 64 <816000000>;
+-			opp-microvolt = <1000000>;
++			opp-microvolt = <1050000 1050000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1008000000 {
+ 			opp-hz = /bits/ 64 <1008000000>;
+-			opp-microvolt = <1100000>;
++			opp-microvolt = <1150000 1150000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1200000000 {
+ 			opp-hz = /bits/ 64 <1200000000>;
+-			opp-microvolt = <1225000>;
++			opp-microvolt = <1275000 1275000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1296000000 {
+ 			opp-hz = /bits/ 64 <1296000000>;
+-			opp-microvolt = <1300000>;
++			opp-microvolt = <1350000 1350000 1400000>;
+ 			clock-latency-ns = <40000>;
  		};
  		opp-1392000000 {
  			opp-hz = /bits/ 64 <1392000000>;
 -			opp-microvolt = <1350000>;
--			clock-latency-ns = <40000>;
--		};
--		opp-1512000000 {
--			opp-hz = /bits/ 64 <1512000000>;
- 			opp-microvolt = <1400000>;
++			opp-microvolt = <1400000 1400000 1450000>;
  			clock-latency-ns = <40000>;
  		};
+ 		opp-1512000000 {
+-			opp-hz = /bits/ 64 <1512000000>;
+-			opp-microvolt = <1400000>;
+-			clock-latency-ns = <40000>;
+-		};
 -		opp-1608000000 {
 -			opp-hz = /bits/ 64 <1608000000>;
 -			opp-microvolt = <1450000>;
 -			clock-latency-ns = <40000>;
 -		};
-+		opp-1512000000 {
 +                       opp-hz = /bits/ 64 <1512000000>;
 +                       opp-microvolt = <1450000>;
 +                       clock-latency-ns = <40000>;
