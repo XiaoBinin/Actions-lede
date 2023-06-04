@@ -26,7 +26,7 @@ env:
   FREE_DISK_SH: scripts/free_disk_space.sh
   ENV_SH: scripts/environment.sh
   DIY_SH: scripts/lede/patch.sh
-  CLASH_CORE: scripts/lede/preset-clash-core.sh
+  CLASH_CORE: scripts/preset-clash-core-arm64.sh
   R8152_PATCH: patchs/lede/r8152/100-add-LED-configuration-from-OF.patch
   UBOOT_PATCH: patchs/lede/uboot/9999-add-missing-parameters-for-LTS.patch
   TARGET_PATCH: patchs/lede/target/9998-add-missing-parameters-for-LTS.patch
@@ -85,7 +85,7 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         cat configs/rockchip.txt >> openwrt/.config
-        cat configs/packages.txt >> openwrt/.config
+        cat configs/arm-packages.txt >> openwrt/.config
         [ -e $R8152_PATCH ] && mv $R8152_PATCH openwrt/package/lean/r8152/patches/
         [ -e $UBOOT_PATCH ] && mv $UBOOT_PATCH openwrt/package/boot/uboot-rockchip/patches
         [ -e $TARGET_PATCH ] && mv $TARGET_PATCH openwrt/target/linux/rockchip/patches-5.15
@@ -98,7 +98,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: 编译固件中
-      id: compile1
+      id: compile
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -111,14 +111,14 @@ jobs:
 
     - name: 上传 bin 目录
       uses: actions/upload-artifact@main
-      if: steps.compile1.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
     - name: 整理文件
       id: organize
-      if: steps.compile1.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success'
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *.bin
@@ -138,7 +138,7 @@ jobs:
 
     - name: 生成发布标签
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && steps.compile1.outputs.status == 'success' && !cancelled()
+      if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         echo -e "ℹ lede主线源码版本，当前是5.15内核\nℹ 第一次无法开机请按一下重置按钮\n🍃 如出现死机不稳定请尝试CPU降频" >> release.txt
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
@@ -156,7 +156,7 @@ jobs:
 
     - name: 删除旧发布的固件
       uses: dev-drprasad/delete-older-releases@v0.2.1
-      if: steps.compile1.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
         keep_latest: 7
         delete_tags: true
