@@ -133,7 +133,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         echo -e "ℹ lede主线源码版本，当前是 X86 平台 6.1 内核\n" >> release.txt
-        echo "release_tag=$(date +"X86_%Y.%m.%d_%H%M")" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"%Y.%m.%d_X86")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件发布
