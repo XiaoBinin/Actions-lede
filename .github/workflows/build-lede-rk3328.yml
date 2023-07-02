@@ -86,7 +86,7 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         cat configs/rk3328.txt >> openwrt/.config
-        cat configs/arm-packages.txt >> openwrt/.config
+        cat configs/packages.txt >> openwrt/.config
         [ -e $UBOOT_PATCH ] && mv $UBOOT_PATCH openwrt/package/boot/uboot-rockchip/patches
         cp -r patchs/3328/* openwrt/target/linux/
         cd openwrt

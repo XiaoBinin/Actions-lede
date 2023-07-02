@@ -86,7 +86,7 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         cat configs/rockchip.txt >> openwrt/.config
-        cat configs/arm-packages.txt >> openwrt/.config
+        cat configs/packages.txt >> openwrt/.config
         [ -e $R8152_PATCH ] && mv $R8152_PATCH openwrt/package/lean/r8152/patches/
         [ -e $UBOOT_PATCH ] && mv $UBOOT_PATCH openwrt/package/boot/uboot-rockchip/patches
         [ -e $TARGET_PATCH ] && mv $TARGET_PATCH openwrt/target/linux/rockchip/patches-5.15
