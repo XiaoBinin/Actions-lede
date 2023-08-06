@@ -17,6 +17,9 @@ sed -i '$a CONFIG_PHY_ROCKCHIP_INNO_USB3=y' target/linux/rockchip/armv8/config-5
 rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
 
+#更改design主题为白色
+sed -i 's/dark/light/g' feeds/luci/applications/luci-app-design-config/root/etc/config/design
+
 #克隆插件
 rm -rf feeds/ssrp/ipt2socks
 
