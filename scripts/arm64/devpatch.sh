@@ -7,7 +7,7 @@ rm -rf ./feeds/luci/applications/luci-app-mosdns
 #克隆插件
 rm -rf feeds/ssrp/ipt2socks
 
-git clone -b packages https://github.com/xiaorouji/openwrt-passwall.git package/pwpage
+git clone https://github.com/xiaorouji/openwrt-passwall-packages.git package/pwpage
 
 mkdir package/small
 pushd package/small
