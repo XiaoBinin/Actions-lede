@@ -83,16 +83,16 @@ config server
 
 config server
 	option enabled '1'
-	option ip 'https://dns.pub/dns-query'
+	option ip 'https://1.12.12.12/dns-query'
 	option type 'https'
 	option name 'DNSPod Public DNS+'
 	option server_group 'home'
 
 config server
 	option enabled '1'
-	option ip '114.114.114.114'
+	option ip '180.184.1.1'
 	option type 'tcp'
-	option name '114 DNS'
+	option name 'ByteDance DNS'
 	option server_group 'home'
 
 config server
