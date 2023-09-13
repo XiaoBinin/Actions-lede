@@ -37,7 +37,7 @@ git clone -b master https://github.com/pymumu/smartdns.git
 #ssrp
 #git clone -b master https://github.com/fw876/helloworld.git
 #passwall
-git clone -b luci --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
+git clone -b main --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
 #passwall2
 git clone -b main https://github.com/xiaorouji/openwrt-passwall2.git
 #mosdns
