@@ -76,7 +76,6 @@ jobs:
     - name: 更新 & 安装 feeds & 执行脚本
       run: |
         cd openwrt
-        chmod +x $GITHUB_WORKSPACE/$KERNEL_SH && $GITHUB_WORKSPACE/$KERNEL_SH
         ./scripts/feeds update -a && ./scripts/feeds install -a
         chmod +x $GITHUB_WORKSPACE/$DIY_SH && $GITHUB_WORKSPACE/$DIY_SH
 
