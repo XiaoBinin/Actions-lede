@@ -4,6 +4,8 @@
 sed -i 's/192.168.1.1/192.168.8.1/g' package/base-files/files/bin/config_generate
 
 #删除feeds中的插件
+rm -rf ./feeds/ssrp/ipt2socks
+rm -rf ./feeds/ssrp/hysteria
 rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
 
@@ -11,9 +13,8 @@ rm -rf ./feeds/luci/applications/luci-app-mosdns
 sed -i 's/dark/light/g' feeds/luci/applications/luci-app-design-config/root/etc/config/design
 
 #克隆插件
-rm -rf feeds/ssrp/ipt2socks
-
 git clone https://github.com/xiaorouji/openwrt-passwall-packages.git package/pwpage
+
 
 mkdir package/small
 pushd package/small
