@@ -6,6 +6,7 @@ sed -i 's/192.168.1.1/192.168.8.1/g' package/base-files/files/bin/config_generat
 #删除feeds中的插件
 rm -rf ./feeds/ssrp/ipt2socks
 rm -rf ./feeds/ssrp/hysteria
+rm -rf ./feeds/ssrp/v2ray-plugin
 rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
 

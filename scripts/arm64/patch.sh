@@ -16,6 +16,7 @@ sed -i '$a CONFIG_PHY_ROCKCHIP_INNO_USB3=y' target/linux/rockchip/armv8/config-5
 #删除feeds中的插件
 rm -rf ./feeds/ssrp/ipt2socks
 rm -rf ./feeds/ssrp/hysteria
+rm -rf ./feeds/ssrp/v2ray-plugin
 rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
 
