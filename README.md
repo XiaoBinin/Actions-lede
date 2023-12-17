@@ -1,5 +1,3 @@
-上游部分插件停更，停止自动编译。
-
 rk3328平台：nanopi-r2c/r2s、orangepi-r1-plus/lts
 
 rk3399平台：nanopi-r4s/r4se
