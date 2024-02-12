@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: build-lede-dev
+name: build-lede-MTK
 
 permissions: write-all
 #开启写权限，防止无法上传到release
@@ -27,10 +27,6 @@ env:
   ENV_SH: scripts/environment.sh
   DIY_SH: scripts/arm64/patch.sh
   CLASH_CORE: scripts/preset-clash-core-arm64.sh
-  R8152_PATCH: patchs/lede/r8152/100-add-LED-configuration-from-OF.patch
-  UBOOT_PATCH: patchs/lede/uboot/9999-add-missing-parameters-for-LTS.patch
-  TARGET_PATCH: patchs/lede/target/9998-add-missing-parameters-for-LTS.patch
-  USB3_FILE: patchs/lede/target/files/phy-rockchip-inno-usb3.c
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
@@ -73,7 +69,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
-        mixkey: 'arm64'
+        mixkey: 'mtk'
         prefix: ${{ github.workspace }}/openwrt
 
     - name: 更新 & 安装 feeds & 执行脚本
@@ -85,12 +81,8 @@ jobs:
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -e files ] && mv files openwrt/files
-        cat configs/rockchip.txt >> openwrt/.config
-        cat configs/packages.txt >> openwrt/.config
-        [ -e $R8152_PATCH ] && mv $R8152_PATCH openwrt/package/lean/r8152/patches/
-        [ -e $UBOOT_PATCH ] && mv $UBOOT_PATCH openwrt/package/boot/uboot-rockchip/patches
-        [ -e $TARGET_PATCH ] && mv $TARGET_PATCH openwrt/target/linux/rockchip/patches-5.15
-        [ -e $USB3_FILE ] && mv $USB3_FILE openwrt/target/linux/rockchip/files/drivers/phy/rockchip
+        cat configs/filogic.txt >> openwrt/.config
+        cat configs/packages-L.txt >> openwrt/.config
         cd openwrt
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE && $GITHUB_WORKSPACE/$CLASH_CORE
         make defconfig
@@ -141,8 +133,8 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        echo -e "✅ lede主线源码版本，当前是5.15内核\nℹ 第一次长时间无法启动请尝试断电重启\n🍃 如出现不稳定可尝试cpu降频" >> release.txt
-        echo "release_tag=$(date +"%Y.%m.%d_Rockchip")" >> $GITHUB_OUTPUT
+        echo -e "✅ lede主线源码版本，当前是5.15内核\n" >> release.txt
+        echo "release_tag=$(date +"%Y.%m.%d-MTK")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件发布
