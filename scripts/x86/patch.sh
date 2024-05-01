@@ -9,6 +9,7 @@ rm -rf ./feeds/ssrp/hysteria
 rm -rf ./feeds/ssrp/v2ray-plugin
 rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
+rm -rf ./feeds/luci/applications/luci-app-smartdns
 
 #更改design主题为白色
 sed -i 's/dark/light/g' feeds/luci/applications/luci-app-design-config/root/etc/config/design
