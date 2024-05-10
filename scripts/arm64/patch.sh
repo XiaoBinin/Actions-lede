@@ -17,7 +17,11 @@ sed -i '$a CONFIG_PHY_ROCKCHIP_INNO_USB3=y' target/linux/rockchip/armv8/config-5
 rm -rf ./feeds/ssrp/ipt2socks
 rm -rf ./feeds/ssrp/hysteria
 rm -rf ./feeds/ssrp/v2ray-plugin
+rm -rf ./feeds/ssrp/chinadns-ng
+rm -rf ./feeds/ssrp/dns2tcp
+rm -rf ./feeds/ssrp/naiveproxy
 rm -rf ./feeds/ssrp/shadowsocksr-libev
+rm -rf ./feeds/ssrp/v2ray-plugin
 rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
 
