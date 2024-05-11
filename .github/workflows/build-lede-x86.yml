@@ -64,7 +64,7 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
-        echo "src-git ssrp https://github.com/fw876/helloworld.git;master" >> ./feeds.conf.default
+        echo "src-git opp https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> ./feeds.conf.default
 
     - name: 开启缓存
       uses: klever1988/cachewrtbuild@main
