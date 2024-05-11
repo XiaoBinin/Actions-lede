@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: build-lede-x86
+name: build-x86
 
 permissions: write-all
 #开启写权限，防止无法上传到release
@@ -133,7 +133,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        echo -e "❌ lede主线源码版本，当前是 X86 平台 6.1 内核(自用编译，插件较少)\n" >> release.txt
+        echo -e "❌ lede主线源码版本，当前是 X86 平台\n" >> release.txt
         echo "release_tag=$(date +"X86_%Y.%m.%d")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
