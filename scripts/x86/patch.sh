@@ -12,9 +12,9 @@ sed -i 's/192.168.1.1/192.168.8.1/g' package/base-files/files/bin/config_generat
 # rm -rf ./feeds/ssrp/naiveproxy
 # rm -rf ./feeds/ssrp/shadowsocksr-libev
 # rm -rf ./feeds/ssrp/v2ray-plugin
-rm -rf ./feeds/packages/net/smartdns
+# rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
-rm -rf ./feeds/luci/applications/luci-app-smartdns
+# rm -rf ./feeds/luci/applications/luci-app-smartdns
 
 #更改design主题为白色
 sed -i 's/dark/light/g' feeds/luci/applications/luci-app-design-config/root/etc/config/design

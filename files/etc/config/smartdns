@@ -4,10 +4,7 @@ config smartdns
 	option dualstack_ip_selection '1'
 	option prefetch_domain '1'
 	option serve_expired '1'
-	option tcp_server '0'
-	option seconddns_tcp_server '0'
 	option port '6053'
-	option ipv6_server '0'
 	option seconddns_port '6553'
 	option seconddns_server_group 'oceans'
 	option seconddns_enabled '1'
@@ -20,21 +17,20 @@ config smartdns
 	option cache_persist '1'
 	option resolve_local_hostnames '1'
 	option force_https_soa '1'
-	option seconddns_force_aaaa_soa '1'
 	option old_port '6053'
 	option old_enabled '0'
 	option old_auto_set_dnsmasq '1'
 
 config domain-rule
-	option no_speed_check '1'
+
 
 config server
+	option enabled '1'
 	option name 'Yandex'
 	option ip '77.88.8.8'
 	option type 'tcp'
 	option server_group 'oceans'
 	option exclude_default_group '1'
-	option enabled '1'
 
 config server
 	option enabled '1'
@@ -45,36 +41,36 @@ config server
 	option exclude_default_group '1'
 
 config server
+	option enabled '1'
 	option name 'Quad9'
 	option ip '9.9.9.10/dns-query'
 	option type 'https'
 	option server_group 'oceans'
 	option exclude_default_group '1'
-	option enabled '1'
 
 config server
+	option enabled '1'
 	option ip '1.1.1.1/dns-query'
 	option type 'https'
 	option server_group 'oceans'
 	option exclude_default_group '1'
 	option name 'Cloudflare'
-	option enabled '1'
 
 config server
+	option enabled '1'
 	option name 'OpenDNS'
 	option ip '208.67.222.222/dns-query'
 	option type 'https'
-	option exclude_default_group '1'
 	option server_group 'oceans'
-	option enabled '1'
+	option exclude_default_group '1'
 
 config server
+	option enabled '0'
+	option name 'Google'
 	option ip '8.8.4.4/dns-query'
 	option type 'https'
 	option server_group 'oceans'
 	option exclude_default_group '1'
-	option name 'Google'
-	option enabled '0'
 
 config server
 	option enabled '0'
@@ -86,25 +82,33 @@ config server
 
 config server
 	option enabled '1'
+	option name 'Ali DNS'
 	option ip '223.5.5.5/dns-query'
 	option type 'https'
-	option name 'Ali DNS'
+	option server_group 'home'
+	option exclude_default_group '1'
 
 config server
+	option enabled '1'
+	option name 'DNSPod Public DNS+'
 	option ip 'dns.pub/dns-query'
 	option type 'https'
-	option name 'DNSPod Public DNS+'
-	option enabled '1'
+	option server_group 'home'
+	option exclude_default_group '1'
 
 config server
+	option enabled '1'
+	option name '360 Secure DNS'
 	option ip '39.156.84.71/dns-query'
 	option type 'https'
-	option name '360 Secure DNS'
-	option enabled '1'
+	option server_group 'home'
+	option exclude_default_group '1'
 
 config server
-	option ip '180.184.1.1'
-	option name 'ByteDance DNS'
 	option enabled '0'
+	option name 'ByteDance DNS'
+	option ip '180.184.1.1'
 	option type 'udp'
+	option server_group 'home'
+	option exclude_default_group '1'
 
