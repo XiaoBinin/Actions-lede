@@ -23,6 +23,11 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  FREE_DISK_SH: scripts/free_disk_space.sh
+  ENV_SH: scripts/environment.sh
+  SETTINGS_SH: scripts/init-settings.sh
+  PACKAGES_SH: scripts/packages.sh
+  CLASH_CORE_SH: scripts/preset-clash-core-arm64.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
@@ -40,11 +45,11 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        chmod +x ./scripts/free_disk_space.sh
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        chmod +x $FREE_DISK_SH && $FREE_DISK_SH
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
-        chmod +x ./scripts/environment.sh
+        chmod +x $ENV_SH && $ENV_SH
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
@@ -71,11 +76,11 @@ jobs:
     - name: 更新 & 安装 feeds & 执行脚本
       run: |
         cd openwrt
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-        chmod +x $GITHUB_WORKSPACE/scripts/init-settings.sh
-        chmod +x $GITHUB_WORKSPACE/scripts/packages.sh
-        chmod +x $GITHUB_WORKSPACE/scripts/preset-clash-core-arm64.sh
+        ./scripts/feeds update -a && ./scripts/feeds update -a
+        ./scripts/feeds install -a && ./scripts/feeds install -a
+        chmod +x $SETTINGS_SH
+        chmod +x $PACKAGES_SH
+        chmod +x $CLASH_CORE_SH
 
     - name: 导入补丁和配置 & 下载文件
       run: |
