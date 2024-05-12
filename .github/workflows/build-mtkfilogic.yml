@@ -132,7 +132,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         echo -e "✅ lede主线源码版本，当前是 mediatek filogic 平台\n" >> release.txt
-        echo "release_tag=$(date +"X86_%Y.%m.%d")" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"MTK_%Y.%m.%d")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件发布
