@@ -40,11 +40,11 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        ./scripts/free_disk_space.sh
+        chmod +x ./scripts/free_disk_space.sh
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
-        ./scripts/environment.sh
+        chmod +x ./scripts/environment.sh
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
