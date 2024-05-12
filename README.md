@@ -1,8 +1,10 @@
-rk3328平台：nanopi-r2c/r2s、orangepi-r1-plus/lts
+（ rk3328周三、rk3568周四、mediatek周五、x86周日 ）运行编译
+
+rk3328平台：nanopi-r2c/r2s/neo3、orangepi-r1-plus/lts
 
 rk3399平台：nanopi-r4s/r4se
 
-rk3568平台：nanopi-r5c/r5s、hinlink_opc-h66k/h68k/h69k、fastrhino_r66s/r68s、mrkaio-m68s/m68s-plus
+rk3568平台：ariaboard_photonicat、fastrhino_r66s、nanopi-r5c/r5s、hinlink_opc-h66k/h68k/h69k、fastrhino_r66s、mrkaio-m68s/plus、lyt_t68m
 
 ![github3](doc/github3.png)
 ![design](doc/design.png)
