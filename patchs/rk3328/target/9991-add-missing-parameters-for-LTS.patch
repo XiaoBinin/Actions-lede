@@ -1,0 +1,272 @@
+Index: b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
+@@ -111,50 +111,45 @@
+ 
+ 		opp-408000000 {
+ 			opp-hz = /bits/ 64 <408000000>;
+-			opp-microvolt = <950000>;
++			opp-microvolt = <950000 950000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 			opp-suspend;
+ 		};
+ 		opp-600000000 {
+ 			opp-hz = /bits/ 64 <600000000>;
+-			opp-microvolt = <950000>;
++			opp-microvolt = <950000 950000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-816000000 {
+ 			opp-hz = /bits/ 64 <816000000>;
+-			opp-microvolt = <1000000>;
++			opp-microvolt = <1050000 1050000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1008000000 {
+ 			opp-hz = /bits/ 64 <1008000000>;
+-			opp-microvolt = <1100000>;
++			opp-microvolt = <1150000 1150000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1200000000 {
+ 			opp-hz = /bits/ 64 <1200000000>;
+-			opp-microvolt = <1225000>;
++			opp-microvolt = <1275000 1275000 1350000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1296000000 {
+ 			opp-hz = /bits/ 64 <1296000000>;
+-			opp-microvolt = <1300000>;
++			opp-microvolt = <1350000 1350000 1400000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1392000000 {
+ 			opp-hz = /bits/ 64 <1392000000>;
+-			opp-microvolt = <1350000>;
++			opp-microvolt = <1400000 1400000 1450000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+ 		opp-1512000000 {
+-			opp-hz = /bits/ 64 <1512000000>;
+-			opp-microvolt = <1400000>;
+-			clock-latency-ns = <40000>;
+-		};
+-		opp-1608000000 {
+-			opp-hz = /bits/ 64 <1608000000>;
+-			opp-microvolt = <1450000>;
+-			clock-latency-ns = <40000>;
+-		};
++                       opp-hz = /bits/ 64 <1512000000>;
++                       opp-microvolt = <1450000>;
++                       clock-latency-ns = <40000>;
++               };
+ 	};
+ 
+ 	analog_sound: analog-sound {
+@@ -875,6 +870,47 @@
+ 		};
+ 	};
+ 
++	usb3phy_grf: syscon@ff460000 {
++		compatible = "rockchip,usb3phy-grf", "syscon";
++		reg = <0x0 0xff460000 0x0 0x1000>;
++	};
++
++	u3phy: usb3-phy@ff470000 {
++		compatible = "rockchip,rk3328-u3phy";
++		reg = <0x0 0xff470000 0x0 0x0>;
++		rockchip,u3phygrf = <&usb3phy_grf>;
++		rockchip,grf = <&grf>;
++		interrupts = <GIC_SPI 77 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "linestate";
++		clocks = <&cru PCLK_USB3PHY_OTG>, <&cru PCLK_USB3PHY_PIPE>;
++		clock-names = "u3phy-otg", "u3phy-pipe";
++		resets = <&cru SRST_USB3PHY_U2>,
++			 <&cru SRST_USB3PHY_U3>,
++			 <&cru SRST_USB3PHY_PIPE>,
++			 <&cru SRST_USB3OTG_UTMI>,
++			 <&cru SRST_USB3PHY_OTG_P>,
++			 <&cru SRST_USB3PHY_PIPE_P>;
++		reset-names = "u3phy-u2-por", "u3phy-u3-por",
++			      "u3phy-pipe-mac", "u3phy-utmi-mac",
++			      "u3phy-utmi-apb", "u3phy-pipe-apb";
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++		status = "disabled";
++
++		u3phy_utmi: utmi@ff470000 {
++			reg = <0x0 0xff470000 0x0 0x8000>;
++			#phy-cells = <0>;
++			status = "disabled";
++		};
++
++		u3phy_pipe: pipe@ff478000 {
++			reg = <0x0 0xff478000 0x0 0x8000>;
++			#phy-cells = <0>;
++			status = "disabled";
++		};
++	};
++
+ 	sdmmc: mmc@ff500000 {
+ 		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
+ 		reg = <0x0 0xff500000 0x0 0x4000>;
+@@ -1015,6 +1051,8 @@
+ 		clock-names = "ref_clk", "suspend_clk",
+ 			      "bus_clk";
+ 		dr_mode = "otg";
++		phys = <&u3phy_utmi>, <&u3phy_pipe>;
++		phy-names = "usb2-phy", "usb3-phy";
+ 		phy_type = "utmi_wide";
+ 		snps,dis-del-phy-power-chg-quirk;
+ 		snps,dis_enblslpm_quirk;
+Index: b/drivers/phy/rockchip/Kconfig
+===================================================================
+--- a/drivers/phy/rockchip/Kconfig
++++ b/drivers/phy/rockchip/Kconfig
+@@ -48,6 +48,15 @@ config PHY_ROCKCHIP_INNO_USB2
+ 	help
+ 	  Support for Rockchip USB2.0 PHY with Innosilicon IP block.
+ 
++config PHY_ROCKCHIP_INNO_USB3
++	tristate "Rockchip INNO USB 3.0 PHY Driver"
++	default y if ARCH_ROCKCHIP
++	depends on OF
++	select GENERIC_PHY
++	select USB_PHY
++	help
++	  Support for Rockchip USB 3.0 PHY with Innosilicon IP block.
++
+ config PHY_ROCKCHIP_INNO_CSIDPHY
+ 	tristate "Rockchip Innosilicon MIPI CSI PHY driver"
+ 	depends on (ARCH_ROCKCHIP || COMPILE_TEST) && OF
+Index: b/drivers/phy/rockchip/Makefile
+===================================================================
+--- a/drivers/phy/rockchip/Makefile
++++ b/drivers/phy/rockchip/Makefile
+@@ -6,6 +6,7 @@ obj-$(CONFIG_PHY_ROCKCHIP_INNO_CSIDPHY)
+ obj-$(CONFIG_PHY_ROCKCHIP_INNO_DSIDPHY)	+= phy-rockchip-inno-dsidphy.o
+ obj-$(CONFIG_PHY_ROCKCHIP_INNO_HDMI)	+= phy-rockchip-inno-hdmi.o
+ obj-$(CONFIG_PHY_ROCKCHIP_INNO_USB2)	+= phy-rockchip-inno-usb2.o
++obj-$(CONFIG_PHY_ROCKCHIP_INNO_USB3)	+= phy-rockchip-inno-usb3.o
+ obj-$(CONFIG_PHY_ROCKCHIP_NANENG_COMBO_PHY)	+= phy-rockchip-naneng-combphy.o
+ obj-$(CONFIG_PHY_ROCKCHIP_PCIE)		+= phy-rockchip-pcie.o
+ obj-$(CONFIG_PHY_ROCKCHIP_SNPS_PCIE3)	+= phy-rockchip-snps-pcie3.o
+--- a/drivers/net/phy/motorcomm.c
++++ b/drivers/net/phy/motorcomm.c
+@@ -228,6 +228,12 @@
+ #define YTPHY_WCR_INTR_SEL			BIT(6)
+ #define YTPHY_WCR_ENABLE			BIT(3)
+ 
++#define YTPHY_LED_NUM_CONFIG			5
++/* LED_GENERAL_CFG: 0xA00B, LED0_CFG: 0xA00C, LED1_CFG: 0xA00D
++ * LED2_CFG: 0xA00E, LED_BLINK_CFG: 0xA00F
++ */
++#define YTPHY_LED_CONFIG_REG(x)			(0xA00B + x)
++
+ /* 2b00 84ms
+  * 2b01 168ms  *default*
+  * 2b10 336ms
+@@ -1564,6 +1570,27 @@ static int yt8521_resume(struct phy_devi
+ 	return yt8521_modify_utp_fiber_bmcr(phydev, BMCR_PDOWN, 0);
+ }
+ 
++static int ytphy_config_led(struct phy_device *phydev)
++{
++	struct device_node *node = phydev->mdio.dev.of_node;
++	u32 led_data[YTPHY_LED_NUM_CONFIG];
++	int ret;
++
++	ret = of_property_read_u32_array(node, "motorcomm,led-data",
++				         led_data, YTPHY_LED_NUM_CONFIG);
++	if (ret)
++		return 0;
++
++	for (int i = 0; i < YTPHY_LED_NUM_CONFIG; i++) {
++		ret = ytphy_write_ext(phydev, YTPHY_LED_CONFIG_REG(i),
++				      led_data[i]);
++		if (ret < 0)
++			return ret;
++	}
++
++	return 0;
++}
++
+ /**
+  * yt8521_config_init() - called to initialize the PHY
+  * @phydev: a pointer to a &struct phy_device
+@@ -1602,6 +1629,10 @@ static int yt8521_config_init(struct phy
+ 		if (ret < 0)
+ 			goto err_restore_page;
+ 	}
++
++	ret = ytphy_config_led(phydev);
++	if (ret < 0)
++		goto err_restore_page;
+ err_restore_page:
+ 	return phy_restore_page(phydev, old_page, ret);
+ }
+@@ -1637,7 +1668,7 @@ static int yt8531_config_init(struct phy
+ 	if (ret < 0)
+ 		return ret;
+ 
+-	return 0;
++	return ytphy_config_led(phydev);
+ }
+ 
+ /**
+Index: b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+@@ -105,7 +105,7 @@
+ 		pcie-eth@0,0 {
+ 			compatible = "pci10ec,8168";
+ 			reg = <0x000000 0 0 0 0>;
+-
++			local-mac-address = [ 00 00 00 00 00 00 ];
+ 			realtek,led-data = <0x870>;
+ 		};
+ 	};
+Index: b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2c.dts
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2c.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-r2c.dts
+@@ -38,6 +38,7 @@
+ 			pinctrl-names = "default";
+ 			reset-assert-us = <10000>;
+ 			reset-deassert-us = <50000>;
++			keep-clkout-on;
+ 			reset-gpios = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
+Index: b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts
+===================================================================
+--- a/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3328-orangepi-r1-plus-lts.dts
+@@ -14,13 +14,13 @@
+ };
+ 
+ &dmc_opp_table {
+-	opp-798000000 {
++	opp-786000000 {
+ 		status = "disabled";
+ 	};
+-	opp-840000000 {
++	opp-798000000 {
+ 		status = "disabled";
+ 	};
+-	opp-924000000 {
++	opp-840000000 {
+ 		status = "disabled";
+ 	};
+ 	opp-1056000000 {
+@@ -49,6 +49,7 @@
+ 			pinctrl-names = "default";
+ 			reset-assert-us = <15000>;
+ 			reset-deassert-us = <50000>;
++			keep-clkout-on;
+ 			reset-gpios = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;
+ 		};
+ 	};
