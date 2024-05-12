@@ -1,19 +1,8 @@
 #!/bin/bash
-#=================================================
-# File name: init-settings.sh
-# Description: This script will be executed during the first boot
-# Author: SuLingGG
-# Blog: https://mlapp.cn
-#=================================================
 
-# Set default theme to luci-theme-argon
-#uci set luci.main.mediaurlbase='/luci-static/argon'
+#更改默认地址为192.168.8.1
+sed -i 's/192.168.1.1/192.168.8.1/g' package/base-files/files/bin/config_generate
 
-# Disable IPV6 ula prefix
-sed -i 's/^[^#].*option ula/#&/' /etc/config/network
+#更改design主题为白色
+sed -i 's/dark/light/g' feeds/luci/applications/luci-app-design-config/root/etc/config/design
 
-# Check file system during boot
-uci set fstab.@global[0].check_fs=1
-uci commit
-
-exit 0
