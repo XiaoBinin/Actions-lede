@@ -11,7 +11,7 @@
 # rm -rf ./feeds/ssrp/v2ray-plugin
 # rm -rf ./feeds/packages/net/smartdns
 rm -rf ./feeds/luci/applications/luci-app-mosdns
-# rm -rf ./feeds/luci/applications/luci-app-smartdns
+rm -rf ./feeds/luci/applications/luci-app-smartdns
 
 
 #克隆插件
