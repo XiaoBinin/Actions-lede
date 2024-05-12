@@ -73,9 +73,9 @@ jobs:
         cd openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        $GITHUB_WORKSPACE/scripts/init-settings.sh
-        $GITHUB_WORKSPACE/scripts/packages.sh
-        $GITHUB_WORKSPACE/scripts/preset-clash-core-amd64.sh
+        chmod +x $GITHUB_WORKSPACE/scripts/init-settings.sh
+        chmod +x $GITHUB_WORKSPACE/scripts/packages.sh
+        chmod +x $GITHUB_WORKSPACE/scripts/preset-clash-core-amd64.sh
 
     - name: 导入补丁和配置 & 下载文件
       run: |
