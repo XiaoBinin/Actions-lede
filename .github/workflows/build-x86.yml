@@ -71,10 +71,11 @@ jobs:
     - name: 更新 & 安装 feeds & 执行脚本
       run: |
         cd openwrt
-        ./scripts/feeds update -a && ./scripts/feeds install -a
-        .$GITHUB_WORKSPACE/scripts/init-settings.sh
-        .$GITHUB_WORKSPACE/scripts/packages.sh
-        .$GITHUB_WORKSPACE/scripts/preset-clash-core-amd64.sh
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        $GITHUB_WORKSPACE/scripts/init-settings.sh
+        $GITHUB_WORKSPACE/scripts/packages.sh
+        $GITHUB_WORKSPACE/scripts/preset-clash-core-amd64.sh
 
     - name: 导入补丁和配置 & 下载文件
       run: |
@@ -147,7 +148,7 @@ jobs:
       uses: dev-drprasad/delete-older-releases@v0.3.3
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        keep_latest: 7
+        keep_latest: 10
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
