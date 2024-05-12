@@ -78,9 +78,9 @@ jobs:
         cd openwrt
         ./scripts/feeds update -a && ./scripts/feeds update -a
         ./scripts/feeds install -a && ./scripts/feeds install -a
-        chmod +x $SETTINGS_SH && $SETTINGS_SH
-        chmod +x $PACKAGES_SH && $PACKAGES_SH
-        chmod +x $CLASH_CORE_SH && $CLASH_CORE_SH
+        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
+        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
     - name: 导入补丁和配置 & 下载文件
       run: |
