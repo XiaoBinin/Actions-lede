@@ -85,7 +85,7 @@ jobs:
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -e files ] && mv files openwrt/files
-        cat configs/rockchip.txt >> openwrt/.config
+        cat configs/rk3568.txt >> openwrt/.config
         cat configs/packages.txt >> openwrt/.config
         cd openwrt
         make defconfig
@@ -136,7 +136,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        echo -e "✅ lede主线源码rk3568平台\nℹ 长时间无法启动请尝试重启或重刷\n🍃 如出现不稳定可尝试cpu降频" >> release.txt
+        echo -e "✅ rk3568平台，lede主线源码\nℹ 长时间无法启动请尝试重启或重刷\n🍃 如出现不稳定可尝试cpu降频" >> release.txt
         echo "release_tag=$(date +"RK3568_%Y.%m.%d")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
