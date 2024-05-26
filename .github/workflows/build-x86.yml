@@ -35,7 +35,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - name: 检查
@@ -50,11 +50,13 @@ jobs:
         sudo -E apt-get -qq full-upgrade -y
         chmod +x $ENV_SH && $ENV_SH
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 检查空间使用情况
+    - name: 检查空间使用情况1
       if: (!cancelled())
       run: df -hT
 
@@ -92,15 +94,42 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译固件中
-      id: compile
+    - name: 编译内核
+      id: mkernel
       run: |
         cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j$(nproc) || make target/linux/compile -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况2
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译插件
+      id: mpackage
+      if: steps.mkernel.outputs.status == 'success' && !cancelled()
+      run: |
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make package/compile -j$(($(nproc)+1)) || make package/compile -j$(nproc) || make package/compile -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况3
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译固件
+      id: compile
+      if: steps.mpackage.outputs.status == 'success' && !cancelled()
+      run: |
+        cd openwrt
+        rm -rf build_dir/target-*/package
         echo -e "$(($(nproc)+1)) thread compile"
         make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况
+    - name: 空间使用情况4
       if: (!cancelled())
       run: df -hT
 
@@ -139,7 +168,7 @@ jobs:
         echo "release_tag=$(date +"X86_%Y.%m.%d")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传固件发布
+    - name: 上传固件到发布
       uses: softprops/action-gh-release@v2.0.4
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
@@ -149,7 +178,7 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-    - name: 删除旧发布的固件
+    - name: 删除以前发布的固件
       uses: dev-drprasad/delete-older-releases@v0.3.3
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
@@ -158,7 +187,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 删除过时工作流程
+    - name: 删除以前工作流程
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
