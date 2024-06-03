@@ -154,7 +154,7 @@ jobs:
       run: |
         [ -e files ] && mv files openwrt/files
         cat configs/rockchip.txt >> openwrt/.config
-        cat configs/packagesfw3.txt >> openwrt/.config
+        cat configs/packages.txt >> openwrt/.config
         cd openwrt
         make defconfig
         make download -j8 V=10
