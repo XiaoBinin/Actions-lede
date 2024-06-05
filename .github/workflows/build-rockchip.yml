@@ -17,8 +17,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-   - cron: 0 23 * * 0
-   #      分,时,日,月,星期。每周六 20时执行一次 (UTC时间)
+   - cron: 0 20 * * 3
+   #   分,时,日,月,星期。每周六 20时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -34,72 +34,7 @@ env:
   TZ: Asia/Shanghai
 
 jobs:
-  Toolchain:
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: 检查
-      uses: actions/checkout@main
-
-    - name: 初始化环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo -E apt-get -qq update -y
-        sudo -E apt-get -qq full-upgrade -y
-        chmod +x $ENV_SH && $ENV_SH
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo timedatectl set-timezone "$TZ"
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
-
-    - name: 克隆源码
-      working-directory: /workdir
-      run: |
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
-    - name: 开启缓存
-      uses: klever1988/cachewrtbuild@main
-      with:
-        ccache: 'true'
-        mixkey: 'armv8'
-        prefix: ${{ github.workspace }}/openwrt
-
-    - name: 更新 & 安装 feeds & 执行脚本
-      run: |
-        cd openwrt
-        ./scripts/feeds update -a && ./scripts/feeds update -a
-        ./scripts/feeds install -a && ./scripts/feeds install -a
-
-    - name: 导入补丁和配置 & 下载文件
-      run: |
-        [ -e files ] && mv files openwrt/files
-        cat configs/rockchip.txt >> openwrt/.config
-        cd openwrt
-        make defconfig
-        make download -j8 V=10
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
-
-    - name: 空间使用情况1
-      if: (!cancelled())
-      run: df -hT
-
-    - name: 编译工具链
-      run: |
-        cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
-        make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
-        make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: 空间使用情况2
-      if: (!cancelled())
-      run: df -hT
-
-  Build:
-    needs: [Toolchain]
+  build:
     runs-on: ubuntu-22.04
 
     steps:
@@ -138,7 +73,6 @@ jobs:
       with:
         ccache: 'true'
         mixkey: 'armv8'
-        skip_saving: 'true'
         prefix: ${{ github.workspace }}/openwrt
 
     - name: 更新 & 安装 feeds & 执行脚本
@@ -161,21 +95,44 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 编译内核
-      id: mkernel
+    - name: 空间使用情况2
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译内核1
+      id: mkernel1
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况2
+    - name: 编译工具链
+      id: mtools
+      if: steps.mkernel1.outputs.status != 'success' && !cancelled()
+      run: |
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
+        make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 编译内核2
+      id: mkernel2
+      if: steps.mkernel1.outputs.status != 'success' && steps.mtools.outputs.status == 'success' && !cancelled()
+      run: |
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况3
       if: (!cancelled())
       run: df -hT
 
     - name: 编译插件
       id: mpackage
-      if: steps.mkernel.outputs.status == 'success' && !cancelled()
+      if: steps.mkernel1.outputs.status == 'success' || steps.mkernel2.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -184,7 +141,7 @@ jobs:
         make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况3
+    - name: 空间使用情况4
       if: (!cancelled())
       run: df -hT
 
@@ -196,7 +153,7 @@ jobs:
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况4
+    - name: 空间使用情况5
       if: (!cancelled())
       run: df -hT
 
@@ -211,7 +168,7 @@ jobs:
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况5
+    - name: 空间使用情况6
       if: (!cancelled())
       run: df -hT
 
