@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
   schedule:
    - cron: 0 20 * * 3
-   #   分,时,日,月,星期。每周六 20时执行一次 (UTC时间)
+   #   分,时,日,月,星期。每周四 20时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
