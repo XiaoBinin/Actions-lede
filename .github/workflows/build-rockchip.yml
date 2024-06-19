@@ -99,17 +99,8 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    - name: 编译内核1
-      id: mkernel1
-      run: |
-        cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
-        make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-
     - name: 编译工具链
       id: mtools
-      if: steps.mkernel1.outputs.status != 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -117,9 +108,9 @@ jobs:
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 编译内核2
-      id: mkernel2
-      if: steps.mkernel1.outputs.status != 'success' && steps.mtools.outputs.status == 'success' && !cancelled()
+    - name: 编译内核
+      id: mkernel
+      if: steps.mtools.outputs.status == 'success'
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -132,7 +123,7 @@ jobs:
 
     - name: 编译插件
       id: mpackage
-      if: steps.mkernel1.outputs.status == 'success' || steps.mkernel2.outputs.status == 'success' && !cancelled()
+      if: steps.mkernel.outputs.status == 'success'
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -147,7 +138,7 @@ jobs:
 
     - name: 清除插件编译文件
       id: cpackage
-      if: steps.mpackage.outputs.status == 'success' && !cancelled()
+      if: steps.mpackage.outputs.status == 'success'
       run: |
         cd openwrt
         rm -rf build_dir/target-*/host
@@ -159,7 +150,7 @@ jobs:
 
     - name: 编译固件
       id: compile
-      if: steps.cpackage.outputs.status == 'success' && !cancelled()
+      if: steps.cpackage.outputs.status == 'success'
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
