@@ -138,7 +138,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         echo -e "✅ allwinner平台\n" >> release.txt
-        echo "release_tag=$(date +"Allwinner_%Y.%m.%d")" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"%Y.%m.%d_Allwinner")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件发布

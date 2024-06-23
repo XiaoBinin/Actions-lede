@@ -142,7 +142,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         echo -e "✅ lede主线源码rk3328平台\nℹ 长时间无法启动请尝试重启或重刷\n🍃 如出现不稳定可尝试cpu降频" >> release.txt
-        echo "release_tag=$(date +"rk3328_%Y.%m.%d")" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"%Y.%m.%d_rk3328")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件发布
