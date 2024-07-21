@@ -23,6 +23,8 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  PLATFORM_FILE: configs/filogic.txt
+  CONFIG_FILE: configs/packages-L.txt
   FREE_DISK_SH: scripts/free_disk_space.sh
   ENV_SH: scripts/environment.sh
   SETTINGS_SH: scripts/init-settings.sh
@@ -72,7 +74,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
-        mixkey: 'cortexa53'
+        mixkey: 'filogic'
         prefix: ${{ github.workspace }}/openwrt
 
     - name: 更新 & 安装 feeds & 执行脚本
@@ -87,8 +89,8 @@ jobs:
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -e files ] && mv files openwrt/files
-        cat configs/filogic.txt >> openwrt/.config
-        cat configs/packages-L.txt >> openwrt/.config
+        [ -e $CPLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
+        [ -e $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
         cd openwrt
         make defconfig
         make download -j8 V=10
