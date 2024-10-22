@@ -21,6 +21,7 @@ config smartdns
 	option old_port '1053'
 	option old_enabled '1'
 	option old_auto_set_dnsmasq '1'
+	option cache_size '0'
 
 config domain-rule
 
