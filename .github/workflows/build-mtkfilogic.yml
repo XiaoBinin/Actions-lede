@@ -80,17 +80,17 @@ jobs:
     - name: 更新 & 安装 feeds & 执行脚本
       run: |
         cd openwrt
-        ./scripts/feeds update -a && ./scripts/feeds update -a
-        ./scripts/feeds install -a && ./scripts/feeds install -a
-        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
-        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
-        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH
+        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
     - name: 导入补丁和配置 & 下载文件
       run: |
-        [ -e files ] && mv files openwrt/files
-        [ -e $CPLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
-        [ -e $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
+        [ -d files ] && mv files openwrt/files || echo "files not found"
+        [ -f $CPLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
+        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
         cd openwrt
         make defconfig
         make download -j8 V=10
@@ -143,7 +143,7 @@ jobs:
         echo "release_tag=$(date +"%Y.%m.%d_MTK")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传固件发布
+    - name: 上传固件到发布
       uses: softprops/action-gh-release@v2.0.4
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
@@ -162,7 +162,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 删除以前工作流程
+    - name: 删除以前的工作流程
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
