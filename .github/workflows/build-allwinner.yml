@@ -89,7 +89,7 @@ jobs:
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -d files ] && mv files openwrt/files || echo "files not found"
-        [ -f $CPLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
+        [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
         cd openwrt
         make defconfig
