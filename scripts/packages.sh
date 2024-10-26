@@ -40,3 +40,4 @@ git clone -b master --depth 1 https://github.com/fw876/helloworld.git
 
 popd
 
+echo "packages executed successfully!"
