@@ -29,7 +29,7 @@ env:
   ENV_SH: scripts/environment.sh
   SETTINGS_SH: scripts/init-settings.sh
   PACKAGES_SH: scripts/packages.sh
-  CLASH_CORE_SH: scripts/preset-clash-core-arm64.sh
+  CLASH_CORE_SH: scripts/preset-clash-core-arm64-L.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
@@ -77,14 +77,11 @@ jobs:
         mixkey: 'filogic'
         prefix: ${{ github.workspace }}/openwrt
 
-    - name: 更新 & 安装 feeds & 执行脚本
+    - name: 安装 feeds
       run: |
         cd openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH
-        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH
-        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
     - name: 导入补丁和配置 & 下载文件
       run: |
@@ -96,6 +93,13 @@ jobs:
         make download -j8 V=10
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+
+    - name: 执行脚本
+      run: |
+        cd openwrt
+        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
+        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
     - name: 编译固件
       id: compile
