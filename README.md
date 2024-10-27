@@ -1,13 +1,17 @@
-（ rk3328周三、rk3568周四、mediatek周五、x86周日 ）运行编译
+# 仅供学习、查阅资料使用。
+**运行编译时间：allwinner 周二、rockchip 周三、mediatek 周四、x86 周五**<br>
 
-rk3328平台：nanopi-r2c/r2s/neo3、orangepi-r1-plus/lts
+x86平台：不用说了吧~<br>
+allwinner平台：请看 releases<br>
+mediatek平台：还是看 releases<br>
+rockchip平台：太多了 去看看 releases<br>
 
-rk3399平台：nanopi-r4s/r4se
-
-rk3568平台：ariaboard_photonicat、fastrhino_r66s、nanopi-r5c/r5s、hinlink_opc-h66k/h68k/h69k、fastrhino_r66s、mrkaio-m68s/plus、lyt_t68m
-
-![github3](doc/github3.png)
-![design](doc/design.png)
+默认ip地址：192.168.8.1<br>默认开启 smartdns（海外端口6553）<br>Openclash已下载好clash内核（mtk平台不下载meta core）<br>
+![github3](doc/github3.png)<br>
+![design](doc/design.png)<br>
+## passwall + smartdns（海外端口6553）使用配置。
+![pwdns](doc/pwdns.png)<br>
+![pwlist](doc/pwlist.png)<br>
 
 **English** | [中文](https://p3terx.com/archives/build-openwrt-with-github-actions.html)
 
@@ -45,8 +49,9 @@ A template for building OpenWrt with GitHub Actions
 - [Cowtransfer](https://cowtransfer.com)
 - [WeTransfer](https://wetransfer.com/)
 - [Mikubill/transfer](https://github.com/Mikubill/transfer)
+- [actions/upload-artifact](https://github.com/actions/upload-artifact)
 - [softprops/action-gh-release](https://github.com/softprops/action-gh-release)
-- [ActionsRML/delete-workflow-runs](https://github.com/ActionsRML/delete-workflow-runs)
+- [Mattraks/delete-workflow-runs](https://github.com/Mattraks/delete-workflow-runs)
 - [dev-drprasad/delete-older-releases](https://github.com/dev-drprasad/delete-older-releases)
 - [peter-evans/repository-dispatch](https://github.com/peter-evans/repository-dispatch)
 
