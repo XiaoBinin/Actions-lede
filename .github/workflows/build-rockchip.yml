@@ -17,8 +17,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-   - cron: 0 20 * * 3
-   #   分,时,日,月,星期。每周四 20时执行一次 (UTC时间)
+   - cron: 0 20 * * 2
+   #   分,时,日,月,星期。每周三 20时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -102,6 +102,7 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
+        make defconfig
 
     - name: 空间使用情况2
       if: (!cancelled())
