@@ -130,16 +130,6 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    - name: 清除dl下载文件
-      if: (!cancelled())
-      run: |
-        cd openwrt
-        rm -rf dl
-
-    - name: 空间使用情况4
-      if: (!cancelled())
-      run: df -hT
-
     - name: 编译插件
       id: mpackage
       if: steps.mkernel.outputs.status == 'success'
@@ -151,7 +141,7 @@ jobs:
         make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况5
+    - name: 空间使用情况4
       if: (!cancelled())
       run: df -hT
 
@@ -163,7 +153,7 @@ jobs:
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况6
+    - name: 空间使用情况5
       if: (!cancelled())
       run: df -hT
 
@@ -178,7 +168,7 @@ jobs:
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况7
+    - name: 空间使用情况6
       if: (!cancelled())
       run: df -hT
 
