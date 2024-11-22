@@ -100,15 +100,63 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
         make defconfig
 
-    - name: 编译固件
-      id: compile
+    - name: 空间使用情况2
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译工具链
+      id: mtools
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
-        make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
+        make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
+        make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况2
+    - name: 空间使用情况3
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译内核
+      id: mkernel
+      if: steps.mtools.outputs.status == 'success'
+      run: |
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况4
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译插件
+      id: mpackage
+      if: steps.mkernel.outputs.status == 'success'
+      run: |
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
+        make package/index
+        make package/install -j$(nproc) || make package/install -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况5
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 编译固件
+      id: compile
+      if: steps.cpackage.outputs.status == 'success'
+      run: |
+        cd openwrt
+        echo -e "$(($(nproc)+1)) thread compile"
+        make target/install -j$(nproc) || make target/install -j1 V=s
+        make json_overview_image_info
+        make checksum
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况6
       if: (!cancelled())
       run: df -hT
 
