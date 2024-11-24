@@ -147,7 +147,7 @@ jobs:
 
     - name: 编译固件
       id: compile
-      if: steps.cpackage.outputs.status == 'success'
+      if: steps.mpackage.outputs.status == 'success'
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -207,7 +207,7 @@ jobs:
 
     - name: 删除以前发布的固件
       uses: dev-drprasad/delete-older-releases@v0.3.3
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: steps.tag.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
         keep_latest: 10
         delete_tags: true
