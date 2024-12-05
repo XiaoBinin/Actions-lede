@@ -1,10 +1,9 @@
-# 仅供学习、查阅资料使用。
-**运行编译时间：allwinner 周二、rockchip 周三、mediatek 周四、x86 周五**<br>
+# 仅供学习、查阅资料使用。本仓库仅仅会发布rockchip平台机型的固件，有部分在，但是有些机型没有，后期会慢慢收集
+**运行编译时间：rockchip 每周三**<br>
 
-x86平台：不用说了吧~<br>
-allwinner平台：请看 releases<br>
-mediatek平台：还是看 releases<br>
-rockchip平台：太多了 去看看 releases<br>
+
+rockchip平台：ariaboard_photonicat、ezpro_mrkaio-m68s、ezpro_mrkaio-m68s、fastrhino_r66s、nanopi-r2c、nanopi-r2s、nanopi-r3s、nanopi-r4s、nanopi-r4se、nanopi-r5c、nanopi-r5s、station-p2、hinlink_opc-h28k、hinlink_opc-h66k、hinlink_opc-h68k、hinlink_opc-h69k、lyt_t68m、radxa_e20c、xunlong_orangepi-5-plus、xunlong_orangepi-r1-plus、xunlong_orangepi-r1-plus-lts、widora_mangopi-m28k、widora_mangopi-m28k-pro<br>
+仓库发布仅有以上机型，如果没有你想要的，请等待更新，谢谢！！！<br>
 
 默认ip地址：192.168.8.1<br>默认开启 smartdns（海外端口6553）<br>Openclash已下载好clash内核（mtk平台不下载meta core）<br>
 ![github3](doc/github3.png)<br>
