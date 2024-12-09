@@ -47,8 +47,6 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo mkdir -p /mnt/workdir
-        sudo chown $USER:$GROUPS /mnt/workdir
         chmod +x $FREE_DISK_SH && $FREE_DISK_SH
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
@@ -57,17 +55,19 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         docker image prune -a -f
         docker container prune -f
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
 
     - name: 检查空间使用情况1
       if: (!cancelled())
       run: df -hT
 
     - name: 克隆源码
-      working-directory: /mnt/workdir
+      working-directory: /workdir
       run: |
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        cd /mnt/workdir/openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd openwrt
         echo "src-git opp https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> ./feeds.conf.default
 
     - name: 开启缓存
@@ -75,20 +75,20 @@ jobs:
       with:
         ccache: 'true'
         mixkey: 'armv8'
-        prefix: /mnt/${{ github.workspace }}/openwrt
+        prefix: ${{ github.workspace }}/openwrt
 
     - name: 安装 feeds
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: 导入补丁和配置 & 下载文件
       run: |
-        [ -d files ] && mv files /mnt/workdir/openwrt/files || echo "files not found"
-        [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> /mnt/workdir/openwrt/.config
-        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> /mnt/workdir/openwrt/.config
-        cd /mnt/workdir/openwrt
+        [ -d files ] && mv files openwrt/files || echo "files not found"
+        [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
+        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
+        cd openwrt
         rm target/linux/rockchip/patches-6.1/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch
         rm target/linux/rockchip/patches-6.6/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch
         make defconfig
@@ -98,7 +98,7 @@ jobs:
 
     - name: 执行脚本
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
@@ -111,7 +111,7 @@ jobs:
     - name: 编译工具链
       id: mtools
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
@@ -121,7 +121,7 @@ jobs:
       id: mkernel
       if: steps.mtools.outputs.status == 'success'
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
@@ -134,7 +134,7 @@ jobs:
       id: mpackage
       if: steps.mkernel.outputs.status == 'success'
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
         make package/index
@@ -149,7 +149,7 @@ jobs:
       id: cpackage
       if: steps.mpackage.outputs.status == 'success'
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -161,7 +161,7 @@ jobs:
       id: compile
       if: steps.cpackage.outputs.status == 'success'
       run: |
-        cd /mnt/workdir/openwrt
+        cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make target/install -j$(nproc) || make target/install -j1 V=s
         make json_overview_image_info
@@ -177,13 +177,13 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: /mnt/workdir/openwrt/bin
+        path: openwrt/bin
 
     - name: 整理文件
       id: organize
       if: steps.compile.outputs.status == 'success'
       run: |
-        cd /mnt/workdir/openwrt/bin/targets/*/*
+        cd openwrt/bin/targets/*/*
         rm -rf *.bin
         rm -rf *.buildinfo 
         rm -rf *.json 
