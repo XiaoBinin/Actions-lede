@@ -1,17 +1,24 @@
 #
-# Copyright (c) 2019-2020 P3TERX
-# Build OpenWrt using GitHub Actions
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
 #
 
 name: build-rockchip
 
 permissions: write-all
+#开启写权限，防止无法上传到release
 
 on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
    - cron: 20 20 * * 2
+   #   分,时,日,月,星期。每周三 20时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -36,10 +43,12 @@ jobs:
     - name: 检查
       uses: actions/checkout@main
 
-    - name: 初始化环境并扩展存储
+    - name: 初始化环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        sudo mkdir -p /mnt/workdir
+        sudo chown $USER:$GROUPS /mnt/workdir
         chmod +x $FREE_DISK_SH && $FREE_DISK_SH
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
@@ -48,35 +57,17 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         docker image prune -a -f
         docker container prune -f
-        
-        # 挂载 /dev/sda1 到 /mnt/sda1
-        sudo mkdir -p /mnt/sda1
-        sudo mount /dev/sda1 /mnt/sda1
-
-        # 创建工作目录并设置权限
-        sudo mkdir -p /mnt/sda1/workdir
-        sudo chmod -R 777 /mnt/sda1/workdir
-        sudo chown -R $USER:$GROUPS /mnt/sda1/workdir
-
-        # 创建软链接到 /workdir
-        sudo rm -rf /workdir
-        sudo ln -s /mnt/sda1/workdir /workdir
-        sudo chmod -R 777 /workdir
-
-        # 验证挂载和软链接
-        ls -ld /workdir
-        df -hT
 
     - name: 检查空间使用情况1
       if: (!cancelled())
       run: df -hT
 
     - name: 克隆源码
-      working-directory: /workdir
+      working-directory: /mnt/workdir
       run: |
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        cd openwrt
+        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        cd /mnt/workdir/openwrt
         echo "src-git opp https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> ./feeds.conf.default
 
     - name: 开启缓存
@@ -84,20 +75,20 @@ jobs:
       with:
         ccache: 'true'
         mixkey: 'armv8'
-        prefix: ${{ github.workspace }}/openwrt
+        prefix: /mnt/${{ github.workspace }}/openwrt
 
     - name: 安装 feeds
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: 导入补丁和配置 & 下载文件
       run: |
-        [ -d files ] && mv files openwrt/files || echo "files not found"
-        [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
-        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
-        cd openwrt
+        [ -d files ] && mv files /mnt/workdir/openwrt/files || echo "files not found"
+        [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> /mnt/workdir/openwrt/.config
+        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> /mnt/workdir/openwrt/.config
+        cd /mnt/workdir/openwrt
         rm target/linux/rockchip/patches-6.1/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch
         rm target/linux/rockchip/patches-6.6/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch
         make defconfig
@@ -107,7 +98,7 @@ jobs:
 
     - name: 执行脚本
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
@@ -120,7 +111,7 @@ jobs:
     - name: 编译工具链
       id: mtools
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
@@ -130,7 +121,7 @@ jobs:
       id: mkernel
       if: steps.mtools.outputs.status == 'success'
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
@@ -143,7 +134,7 @@ jobs:
       id: mpackage
       if: steps.mkernel.outputs.status == 'success'
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
         make package/index
@@ -158,7 +149,7 @@ jobs:
       id: cpackage
       if: steps.mpackage.outputs.status == 'success'
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
@@ -170,7 +161,7 @@ jobs:
       id: compile
       if: steps.cpackage.outputs.status == 'success'
       run: |
-        cd openwrt
+        cd /mnt/workdir/openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make target/install -j$(nproc) || make target/install -j1 V=s
         make json_overview_image_info
@@ -186,13 +177,13 @@ jobs:
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       with:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+        path: /mnt/workdir/openwrt/bin
 
     - name: 整理文件
       id: organize
       if: steps.compile.outputs.status == 'success'
       run: |
-        cd openwrt/bin/targets/*/*
+        cd /mnt/workdir/openwrt/bin/targets/*/*
         rm -rf *.bin
         rm -rf *.buildinfo 
         rm -rf *.json 
