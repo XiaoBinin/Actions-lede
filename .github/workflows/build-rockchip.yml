@@ -47,7 +47,15 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo mount -t /dev/sda1 -o size=40G tmpfs /dev/root
+       # 检查当前分区信息
+       df -h
+        # 挂载 /dev/sda1 到 /root/temp
+        sudo mkdir -p /root/temp
+        sudo mount /dev/sda1 /root/temp
+        # 将 /root/temp 绑定到目标路径（如 /root/workspace）
+        sudo mount --bind /root/temp /root/workspace
+        # 验证挂载
+        df -h
         chmod +x $FREE_DISK_SH && $FREE_DISK_SH
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
