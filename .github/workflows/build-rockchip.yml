@@ -1,24 +1,17 @@
 #
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
+# Copyright (c) 2019-2020 P3TERX
+# Build OpenWrt using GitHub Actions
 #
 
 name: build-rockchip
 
 permissions: write-all
-#开启写权限，防止无法上传到release
 
 on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
    - cron: 20 20 * * 2
-   #   分,时,日,月,星期。每周三 20时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -43,19 +36,10 @@ jobs:
     - name: 检查
       uses: actions/checkout@main
 
-    - name: 初始化环境
+    - name: 初始化环境并扩展存储
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-       # 检查当前分区信息
-       df -h
-        # 挂载 /dev/sda1 到 /root/temp
-        sudo mkdir -p /root/temp
-        sudo mount /dev/sda1 /root/temp
-        # 将 /root/temp 绑定到目标路径（如 /root/workspace）
-        sudo mount --bind /root/temp /root/workspace
-        # 验证挂载
-        df -h
         chmod +x $FREE_DISK_SH && $FREE_DISK_SH
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
@@ -64,8 +48,12 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         docker image prune -a -f
         docker container prune -f
-        sudo mkdir -p /workdir
-        sudo chown $USER:$GROUPS /workdir
+        sudo mkdir -p /mnt/sda1
+        sudo mount /dev/sda1 /mnt/sda1
+        sudo mkdir -p /mnt/sda1/workdir
+        ln -s /mnt/sda1/workdir /workdir
+        sudo chown -R $USER:$GROUPS /mnt/sda1/workdir
+        df -hT
 
     - name: 检查空间使用情况1
       if: (!cancelled())
