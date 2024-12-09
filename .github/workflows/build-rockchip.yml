@@ -48,11 +48,23 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         docker image prune -a -f
         docker container prune -f
+        
+        # 挂载 /dev/sda1 到 /mnt/sda1
         sudo mkdir -p /mnt/sda1
         sudo mount /dev/sda1 /mnt/sda1
+
+        # 创建工作目录并设置权限
         sudo mkdir -p /mnt/sda1/workdir
-        ln -s /mnt/sda1/workdir /workdir
+        sudo chmod -R 777 /mnt/sda1/workdir
         sudo chown -R $USER:$GROUPS /mnt/sda1/workdir
+
+        # 创建软链接到 /workdir
+        sudo rm -rf /workdir
+        sudo ln -s /mnt/sda1/workdir /workdir
+        sudo chmod -R 777 /workdir
+
+        # 验证挂载和软链接
+        ls -ld /workdir
         df -hT
 
     - name: 检查空间使用情况1
