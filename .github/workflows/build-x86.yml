@@ -68,6 +68,7 @@ jobs:
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
         echo "src-git opp https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> ./feeds.conf.default
+        echo "src-git modem https://github.com/FUjr/modem_feeds.git;main" >> ./feeds.conf.default
 
     - name: 开启缓存
       uses: klever1988/cachewrtbuild@main

@@ -42,6 +42,8 @@ git clone -b main --depth 1 https://github.com/xiaorouji/openwrt-passwall2.git
 # git clone -b v5 --depth 1 https://github.com/sbwml/luci-app-mosdns.git
 #openclash
 # git clone -b master --depth 1 https://github.com/vernesong/OpenClash.git
+#modem
+git clone -b main --depth 1 https://github.com/FUjr/modem_feeds.git
 
 popd
 
