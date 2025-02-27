@@ -130,6 +130,7 @@ jobs:
         rm -rf *.json 
         rm -rf *.manifest 
         rm -rf packages
+        rm -rf *-kernel.bin *-factory.bin
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 

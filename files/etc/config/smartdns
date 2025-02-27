@@ -15,11 +15,11 @@ config smartdns
 	option seconddns_tcp_server '1'
 	option seconddns_enabled '1'
 	option seconddns_force_aaaa_soa '1'
-	option enabled '1'
+	option enabled '0'
 	option port '1053'
 	option seconddns_server_group 'oceans'
 	option old_port '1053'
-	option old_enabled '1'
+	option old_enabled '0'
 	option old_auto_set_dnsmasq '1'
 	option cache_size '0'
 
@@ -47,6 +47,14 @@ config server
 
 config server
 	option enabled '1'
+	option name 'Cloudflare'
+	option ip '1.1.1.1/dns-query'
+	option type 'https'
+	option server_group 'oceans'
+	option exclude_default_group '1'
+
+config server
+	option enabled '0'
 	option name 'Quad9'
 	option ip '9.9.9.10/dns-query'
 	option type 'https'
@@ -54,7 +62,7 @@ config server
 	option exclude_default_group '1'
 
 config server
-	option enabled '1'
+	option enabled '0'
 	option name 'Google'
 	option ip '8.8.4.4/dns-query'
 	option type 'https'
@@ -84,14 +92,6 @@ config server
 	option type 'https'
 	option server_group 'oceans'
 	option exclude_default_group '1'
-
-config server
-	option enabled '0'
-	option ip '1.1.1.1/dns-query'
-	option type 'https'
-	option server_group 'oceans'
-	option exclude_default_group '1'
-	option name 'Cloudflare'
 
 config server
 	option enabled '0'
