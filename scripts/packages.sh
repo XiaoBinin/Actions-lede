@@ -44,8 +44,6 @@ git clone -b main --depth 1 https://github.com/xiaorouji/openwrt-passwall2.git
 # git clone -b master --depth 1 https://github.com/vernesong/OpenClash.git
 #modem
 # git clone -b main --depth 1 https://github.com/FUjr/modem_feeds.git
-# 5g支持 
-git clone --depth=1 https://github.com/Siriling/5G-Modem-Support
 
 
 popd
