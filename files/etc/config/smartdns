@@ -9,7 +9,7 @@ config smartdns
 	option serve_expired '1'
 	option cache_persist '1'
 	option resolve_local_hostnames '1'
-	option force_https_soa '1'
+	option force_https_soa '0'
 	option rr_ttl_min '600'
 	option seconddns_port '6553'
 	option seconddns_tcp_server '1'
@@ -18,10 +18,11 @@ config smartdns
 	option enabled '0'
 	option port '1053'
 	option seconddns_server_group 'oceans'
+	option prefetch_domain '1'
 	option old_port '1053'
 	option old_enabled '0'
 	option old_auto_set_dnsmasq '1'
-	option cache_size '0'
+	option cache_size '10000'
 
 config domain-rule
 
@@ -30,7 +31,7 @@ config client-rule
 config ip-rule
 
 config server
-	option enabled '1'
+	option enabled '0'
 	option name 'Yandex'
 	option ip '77.88.8.1'
 	option type 'tcp'
@@ -54,7 +55,7 @@ config server
 	option exclude_default_group '1'
 
 config server
-	option enabled '0'
+	option enabled '1'
 	option name 'Quad9'
 	option ip '9.9.9.10/dns-query'
 	option type 'https'
@@ -120,7 +121,8 @@ config server
 	option type 'https'
 
 config server
+	option enabled '0'
 	option name 'ByteDance DNS'
 	option ip '180.184.1.1'
 	option type 'udp'
-	option enabled '0'
+	
