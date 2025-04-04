@@ -4,6 +4,9 @@ CONFIG_TARGET_MULTI_PROFILE=y
 CONFIG_TARGET_DEVICE_sunxi_cortexa53_DEVICE_xunlong_orangepi-zero2=y
 CONFIG_TARGET_DEVICE_sunxi_cortexa53_DEVICE_xunlong_orangepi-zero3=y
 
+CONFIG_TARGET_OPTIONS=y"
+CONFIG_TARGET_OPTIMIZATION=\"-O2 -pipe -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53\"
+
 #rootfs
 # CONFIG_TARGET_ROOTFS_EXT4FS is not set
 CONFIG_TARGET_ROOTFS_PARTSIZE=300
