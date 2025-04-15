@@ -33,5 +33,3 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-ax3000t=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-wr30u=y
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000=y
 
-CONFIG_TARGET_OPTIONS=y"
-CONFIG_TARGET_OPTIMIZATION=\"-O2 -pipe -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53\"

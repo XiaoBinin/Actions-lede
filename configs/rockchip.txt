@@ -27,9 +27,6 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus-lts=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k-pro=y
 
-CONFIG_TARGET_OPTIONS=y"
-CONFIG_TARGET_OPTIMIZATION=\"-O2 -pipe -march=armv8-a+crypto+crc\"
-
 #rootfs
 CONFIG_TARGET_ROOTFS_EXT4FS=n
 CONFIG_TARGET_ROOTFS_PARTSIZE=300
