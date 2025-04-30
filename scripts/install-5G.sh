@@ -22,6 +22,7 @@ if [ $? -ne 0 ]; then
 fi
 rm -rf package/Modem-Support/rooter/0optionalapps/bwallocate
 rm -rf package/Modem-Support/rooter/0optionalapps/ext-rspeedtest
+rm -rf package/Modem-Support/rooter/0optionalapps/ext-speedtest
 
 # 2. 创建目标目录（使用 -p 防止目录已存在时报错）
 mkdir -p package/network/utils/quectel-CM-5G
