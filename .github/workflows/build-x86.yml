@@ -84,6 +84,14 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
+    - name: 执行脚本
+      run: |
+        cd openwrt
+        chmod +x $GITHUB_WORKSPACE/$INSTALL5G_SH && $GITHUB_WORKSPACE/$INSTALL5G_SH
+        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
+        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
+
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -d files ] && mv files openwrt/files || echo "files not found"
@@ -95,15 +103,6 @@ jobs:
         make download -j8 V=10
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
-    - name: 执行脚本
-      run: |
-        cd openwrt
-        chmod +x $GITHUB_WORKSPACE/$INSTALL5G_SH && $GITHUB_WORKSPACE/$INSTALL5G_SH
-        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
-        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
-        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
-        make defconfig
 
     - name: 空间使用情况2
       if: (!cancelled())
