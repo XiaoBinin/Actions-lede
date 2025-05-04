@@ -117,7 +117,20 @@ jobs:
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况3
+    - name: 空间使用情况3_1
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 清除工具链编译中间产物...
+      if: steps.mtools.outputs.status == 'success'
+      run: |
+        cd openwrt
+        rm -rf dl/*
+        rm -rf build_dir/host/*
+        rm -rf tmp/*
+        rm -rf build_dir/toolchain-*
+
+    - name: 空间使用情况3_2
       if: (!cancelled())
       run: df -hT
 
