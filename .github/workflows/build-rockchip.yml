@@ -65,7 +65,7 @@ jobs:
     - name: 克隆源码
       working-directory: /workdir
       run: |
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone $REPO_URL --depth 1 -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
 
@@ -116,6 +116,23 @@ jobs:
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
+    - name: 空间使用情况3_1
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 清除工具链编译中间产物...
+      if: steps.mtools.outputs.status == 'success'
+      run: |
+        cd openwrt
+        rm -rf dl/*
+        rm -rf build_dir/host/*
+        rm -rf tmp/*
+        rm -rf build_dir/toolchain-*
+
+    - name: 空间使用情况3_2
+      if: (!cancelled())
+      run: df -hT
+
     - name: 编译内核
       id: mkernel
       if: steps.mtools.outputs.status == 'success'
@@ -125,7 +142,7 @@ jobs:
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况3
+    - name: 空间使用情况4
       if: (!cancelled())
       run: df -hT
 
@@ -140,7 +157,7 @@ jobs:
         make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况4
+    - name: 空间使用情况5
       if: (!cancelled())
       run: df -hT
 
@@ -152,7 +169,7 @@ jobs:
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况5
+    - name: 空间使用情况6
       if: (!cancelled())
       run: df -hT
 
@@ -167,7 +184,7 @@ jobs:
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况6
+    - name: 空间使用情况7
       if: (!cancelled())
       run: df -hT
 
