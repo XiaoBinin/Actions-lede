@@ -153,6 +153,8 @@ jobs:
       run: |
         cd openwrt
         make package/pwpage/compile -j$(($(nproc)+1)) || make package/pwpage/compile -j1 V=s
+        make package/index
+        make package/install
         rm -rf dl/*
         rm -rf build_dir/host/*
         echo "status=success" >> $GITHUB_OUTPUT
