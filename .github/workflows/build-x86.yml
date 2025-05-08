@@ -127,7 +127,6 @@ jobs:
         cd openwrt
         rm -rf dl/*
         rm -rf build_dir/host/*
-        rm -rf tmp/*
         rm -rf build_dir/toolchain-*
 
     - name: 空间使用情况3_2
@@ -143,23 +142,7 @@ jobs:
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况4_1
-      if: (!cancelled())
-      run: df -hT
-
-    - name: 先编译Xray等相关插件
-      id: mxray
-      if: steps.mkernel.outputs.status == 'success'
-      run: |
-        cd openwrt
-        make package/pwpage/compile -j$(($(nproc)+1)) || make package/pwpage/compile -j1 V=s
-        make package/index
-        make package/install
-        rm -rf dl/*
-        rm -rf build_dir/host/*
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: 空间使用情况4_2
+    - name: 空间使用情况4
       if: (!cancelled())
       run: df -hT
 
@@ -171,16 +154,28 @@ jobs:
         echo -e "$(($(nproc)+1)) thread compile"
         make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
         make package/index
-        make package/install -j1 V=s || true
+        make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 空间使用情况5
       if: (!cancelled())
       run: df -hT
 
+    - name: 清除插件编译文件
+      id: cpackage
+      if: steps.mpackage.outputs.status == 'success'
+      run: |
+        cd openwrt
+        rm -rf build_dir/target-*/host
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况6
+      if: (!cancelled())
+      run: df -hT
+
     - name: 编译固件
       id: compile
-      if: steps.mpackage.outputs.status == 'success'
+      if: steps.cpackage.outputs.status == 'success'
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -189,7 +184,7 @@ jobs:
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况6
+    - name: 空间使用情况7
       if: (!cancelled())
       run: df -hT
 
@@ -240,7 +235,7 @@ jobs:
 
     - name: 删除以前发布的固件
       uses: dev-drprasad/delete-older-releases@v0.3.3
-      if: steps.tag.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
         keep_latest: 10
         delete_tags: true
