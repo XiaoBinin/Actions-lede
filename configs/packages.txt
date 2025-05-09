@@ -1,5 +1,6 @@
 #kmod
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
+# USB RNDIS（远程网络驱动接口规范）支持，用于 USB 共享网络（如手机 USB 共享）
 
 
 #themes
@@ -7,17 +8,18 @@ CONFIG_PACKAGE_luci-theme-argon=y
 
 #luci
 CONFIG_PACKAGE_luci-app-accesscontrol=y
-CONFIG_PACKAGE_luci-app-adbyby-plus=y
 CONFIG_PACKAGE_luci-app-adguardhome=y
 # CONFIG_PACKAGE_luci-app-adguardhome_INCLUDE_binary is not set
 CONFIG_PACKAGE_luci-app-alist=y
 CONFIG_PACKAGE_luci-app-aliyundrive-fuse=y
 CONFIG_PACKAGE_luci-app-aliyundrive-webdav=y
+CONFIG_PACKAGE_luci-app-argon-config=y
 CONFIG_PACKAGE_luci-app-autoreboot=y
-CONFIG_PACKAGE_luci-app-ddns-go=y
-# CONFIG_PACKAGE_luci-app-ddns is not set
+CONFIG_PACKAGE_luci-app-ddns=y
 CONFIG_PACKAGE_luci-app-ddnsto=y
 CONFIG_PACKAGE_luci-app-diskman=y
+CONFIG_PACKAGE_luci-app-filetransfer=y
+CONFIG_PACKAGE_luci-app-hd-idle=y
 CONFIG_PACKAGE_luci-app-ipsec-server=y
 CONFIG_PACKAGE_luci-app-lucky=y
 CONFIG_PACKAGE_luci-app-mosdns=y
@@ -31,7 +33,7 @@ CONFIG_PACKAGE_luci-app-passwall2=y
 CONFIG_PACKAGE_luci-app-pptp-server=y
 CONFIG_PACKAGE_luci-app-pushbot=y
 CONFIG_PACKAGE_luci-app-ramfree=y
-CONFIG_PACKAGE_luci-app-samba4=y
+CONFIG_PACKAGE_luci-app-samba=y
 CONFIG_PACKAGE_luci-app-smartdns=y
 CONFIG_PACKAGE_luci-app-ssr-plus=y
 CONFIG_PACKAGE_luci-app-tencentddns=y
@@ -45,7 +47,6 @@ CONFIG_PACKAGE_luci-app-wireguard=y
 CONFIG_PACKAGE_luci-app-wol=y
 CONFIG_PACKAGE_luci-app-wrtbwmon=y
 CONFIG_PACKAGE_luci-app-zerotier=y
-
 
 # Configuration
 #

@@ -1,5 +1,6 @@
 #kmod
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
+# USB RNDIS（远程网络驱动接口规范）支持，用于 USB 共享网络（如手机 USB 共享）
 
 
 #themes
@@ -22,7 +23,7 @@ CONFIG_PACKAGE_luci-app-mosdns=y
 # CONFIG_PACKAGE_luci-app-nlbwmon is not set
 CONFIG_PACKAGE_luci-app-openclash=y
 CONFIG_PACKAGE_luci-app-passwall=y
-# CONFIG_PACKAGE_luci-app-passwall2 is not set
+CONFIG_PACKAGE_luci-app-passwall2=y
 CONFIG_PACKAGE_luci-app-ramfree=y
 CONFIG_PACKAGE_luci-app-samba=y
 CONFIG_PACKAGE_luci-app-smartdns=y
@@ -50,7 +51,7 @@ CONFIG_PACKAGE_luci-app-passwall_INCLUDE_SingBox=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_tuic_client is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Geodata is not set
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_V2ray_Plugin is not set
-# CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray is not set
+CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray=y
 # CONFIG_PACKAGE_luci-app-passwall_INCLUDE_Xray_Plugin is not set
 # end of Configuration
 
@@ -71,8 +72,6 @@ CONFIG_PACKAGE_luci-app-passwall2_INCLUDE_SingBox=y
 # CONFIG_PACKAGE_luci-app-passwall2_INCLUDE_V2ray_Plugin is not set
 # end of Configuration
 
-# CONFIG_PACKAGE_xray-core is not set
-# CONFIG_PACKAGE_xray-plugin is not set
 
 
 
