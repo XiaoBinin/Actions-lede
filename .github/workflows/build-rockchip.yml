@@ -67,7 +67,6 @@ jobs:
       run: |
         git clone $REPO_URL --depth 1 -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        cd openwrt
 
     - name: 开启缓存
       uses: klever1988/cachewrtbuild@main
@@ -82,6 +81,14 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
+    - name: 执行脚本
+      run: |
+        cd openwrt
+        chmod +x $GITHUB_WORKSPACE/$INSTALL5G_SH && $GITHUB_WORKSPACE/$INSTALL5G_SH
+        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
+        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
+        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
+
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -d files ] && mv files openwrt/files || echo "files not found"
@@ -95,14 +102,6 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: 执行脚本
-      run: |
-        cd openwrt
-        chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
-        chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
-        chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
-        make defconfig
-
     - name: 空间使用情况2
       if: (!cancelled())
       run: df -hT
@@ -111,6 +110,7 @@ jobs:
       id: mtools
       run: |
         cd openwrt
+        make defconfig
         echo -e "$(($(nproc)+1)) thread compile"
         make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
@@ -121,12 +121,11 @@ jobs:
       run: df -hT
 
     - name: 清除工具链编译中间产物...
-      if: steps.mtools.outputs.status == 'success'
+      if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         rm -rf dl/*
         rm -rf build_dir/host/*
-        rm -rf tmp/*
         rm -rf build_dir/toolchain-*
 
     - name: 空间使用情况3_2
@@ -135,7 +134,7 @@ jobs:
 
     - name: 编译内核
       id: mkernel
-      if: steps.mtools.outputs.status == 'success'
+      if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -148,7 +147,7 @@ jobs:
 
     - name: 编译插件
       id: mpackage
-      if: steps.mkernel.outputs.status == 'success'
+      if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -163,7 +162,7 @@ jobs:
 
     - name: 清除插件编译文件
       id: cpackage
-      if: steps.mpackage.outputs.status == 'success'
+      if: steps.mpackage.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         rm -rf build_dir/target-*/host
@@ -175,7 +174,7 @@ jobs:
 
     - name: 编译固件
       id: compile
-      if: steps.cpackage.outputs.status == 'success'
+      if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
@@ -237,7 +236,7 @@ jobs:
       uses: dev-drprasad/delete-older-releases@v0.3.3
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        keep_latest: 10
+        keep_latest: 15
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
