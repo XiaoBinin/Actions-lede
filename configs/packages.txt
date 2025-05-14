@@ -1,6 +1,6 @@
 #kmod
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
-# USB RNDIS£¨Ô¶³ÌÍøÂçÇý¶¯½Ó¿Ú¹æ·¶£©Ö§³Ö£¬ÓÃÓÚ USB ¹²ÏíÍøÂç£¨ÈçÊÖ»ú USB ¹²Ïí£©
+# USB RNDISï¼ˆè¿œç¨‹ç½‘ç»œé©±åŠ¨æŽ¥å£è§„èŒƒï¼‰æ”¯æŒï¼Œç”¨äºŽ USB å…±äº«ç½‘ç»œï¼ˆå¦‚æ‰‹æœº USB å…±äº«ï¼‰
 
 
 #themes
