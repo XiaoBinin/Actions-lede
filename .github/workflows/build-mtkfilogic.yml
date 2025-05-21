@@ -27,10 +27,10 @@ env:
   REPO_BRANCH: master
   PLATFORM_FILE: configs/filogic.txt
   CONFIG_FILE: configs/packages-L.txt
-  CONFIG_STORAGE: configs/storage-usb.txt
   SETTINGS_SH: scripts/init-settings.sh
   PACKAGES_SH: scripts/packages.sh
   CLASH_CORE_SH: scripts/preset-clash-core-arm64-L.sh
+  ADDMOUNT_SH: scripts/add_automount.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
   UPLOAD_RELEASE: true
@@ -89,13 +89,13 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
+        chmod +x $GITHUB_WORKSPACE/$ADDMOUNT_SH && $GITHUB_WORKSPACE/$ADDMOUNT_SH
 
     - name: 导入补丁和配置 & 下载文件
       run: |
         [ -d files ] && mv files openwrt/files || echo "files not found"
         [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
-        [ -f $CONFIG_STORAGE ] && cat $CONFIG_STORAGE >> openwrt/.config
         cd openwrt
         make defconfig
         make download -j8 V=10
