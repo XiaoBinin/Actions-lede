@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
   schedule:
    - cron: 0 20 * * 2
-   #   分,时,日,月,星期。每周三 20时执行一次 (UTC时间)
+   #      分,时,日,月,周。每周三 20时执行一次 (UTC时间)
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
@@ -29,6 +29,7 @@ env:
   ENV_SH: scripts/environment.sh
   SETTINGS_SH: scripts/init-settings.sh
   PACKAGES_SH: scripts/packages.sh
+  INSTALL5G_SH: scripts/install-5G.sh
   CLASH_CORE_SH: scripts/preset-clash-core-arm64.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
@@ -94,6 +95,7 @@ jobs:
         [ -d files ] && mv files openwrt/files || echo "files not found"
         [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
+        [ -f $CONFIG_5G ] && cat $CONFIG_5G >> openwrt/.config
         cd openwrt
         rm target/linux/rockchip/patches-6.1/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch
         rm target/linux/rockchip/patches-6.6/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch
@@ -218,7 +220,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        echo -e "✅ lede主线源码版本，当前是 rockchip平台\nℹ 长时间无法启动请尝试重启或重刷\n🍃 如出现不稳定可尝试cpu降频" >> release.txt
+        echo -e "🎉 rockchip平台✅ 主线源码\n🍃 如出现不稳定可尝试cpu降频" >> release.txt
         echo "release_tag=$(date +"%Y.%m.%d_Rockchip")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
