@@ -9,13 +9,13 @@ TARGET_FILES=(
 )
 
 # 移动文件
-if [ -d "$PATCH_DIR" ]; then
-  echo "🔄 正在移动补丁文件..."
-  mv "$PATCH_DIR"/* "$TARGET_DIR"
-else
-  echo "❌ 源目录不存在：$PATCH_DIR"
-  exit 1
-fi
+# if [ -d "$PATCH_DIR" ]; then
+#   echo "🔄 正在移动补丁文件..."
+#   mv "$PATCH_DIR"/* "$TARGET_DIR"
+# else
+#   echo "❌ 源目录不存在：$PATCH_DIR"
+#   exit 1
+# fi
 
 # 检查每个目标文件是否存在
 all_ok=true

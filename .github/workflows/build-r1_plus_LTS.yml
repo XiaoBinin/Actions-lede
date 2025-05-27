@@ -31,6 +31,7 @@ env:
   PACKAGES_SH: scripts/packages.sh
   INSTALL5G_SH: scripts/install-5G.sh
   CLASH_CORE_SH: scripts/preset-clash-core-arm64-L.sh
+  PATCH_DIR: patches/r1pluslts
   DTS_SH: scripts/r1pluslts/new-dts.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: false
@@ -89,6 +90,7 @@ jobs:
         [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
         [ -f $CONFIG_5G ] && cat $CONFIG_5G >> openwrt/.config
+        [ -d $PATCH_DIR ] && mv "$PATCH_DIR"/* openwrt/target/linux/rockchip/files/arch/arm64/boot/dts/rockchip
         cd openwrt
         rm target/linux/rockchip/patches-*/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch || true
         chmod +x $GITHUB_WORKSPACE/$INSTALL5G_SH && $GITHUB_WORKSPACE/$INSTALL5G_SH
