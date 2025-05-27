@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATCH_DIR="../patchs/r1pluslts"
+PATCH_DIR="../patches/r1pluslts"
 TARGET_DIR="target/linux/rockchip/files/arch/arm64/boot/dts/rockchip"
 TARGET_FILES=(
   "rk3328-orangepi-r1-plus.dts"
