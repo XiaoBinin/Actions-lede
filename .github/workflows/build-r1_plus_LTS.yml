@@ -75,7 +75,9 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
-        mixkey: 'r1pluslts'
+        toolchain: 'true'
+        skip_saving: 'true'
+        mixkey: 'armv8'
         prefix: ${{ github.workspace }}/openwrt
 
     - name: 安装 feeds
