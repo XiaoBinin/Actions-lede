@@ -100,13 +100,13 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
         chmod +x $GITHUB_WORKSPACE/$DTS_SH && $GITHUB_WORKSPACE/$DTS_SH
 
-    - name: 下载文件
-      run: |
-        cd openwrt
-        make defconfig
-        make download -j8 V=10
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+    # - name: 下载文件
+    #   run: |
+    #     cd openwrt
+    #     make defconfig
+    #     make download -j8 V=10
+    #     find dl -size -1024c -exec ls -l {} \;
+    #     find dl -size -1024c -exec rm -f {} \;
 
     - name: 空间使用情况2
       if: (!cancelled())
@@ -118,7 +118,7 @@ jobs:
         cd openwrt
         make defconfig
         echo -e "$(($(nproc)+1)) thread compile"
-        make tools/compile -j1 || make tools/compile -j1 V=s
+        make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
