@@ -25,17 +25,9 @@ for file in "${TARGET_FILES[@]}"; do
   else
     echo "❌ $file 移动失败"
     all_ok=false
+    exit 1
   fi
 done
-
-# 最终判断
-if [ "$all_ok" = true ]; then
-  echo "🎉 所有文件均已成功移动"
-  exit 0
-else
-  echo "🚨 有文件未成功移动"
-  exit 1
-fi
 
 # 自动删除 tools/ninja/Makefile 中的 --no-rebuild 参数
 MAKEFILE="tools/ninja/Makefile"
@@ -50,3 +42,12 @@ fi
 sed -i 's/--no-rebuild//g' "$MAKEFILE"
 
 echo "已从 $MAKEFILE 中删除 '--no-rebuild' 参数。"
+
+# 最终判断
+if [ "$all_ok" = true ]; then
+  echo "🎉 所有文件均已成功移动"
+  exit 0
+else
+  echo "🚨 有文件未成功移动"
+  exit 1
+fi
