@@ -29,19 +29,19 @@ for file in "${TARGET_FILES[@]}"; do
   fi
 done
 
-# 自动删除 tools/ninja/Makefile 中的 --no-rebuild 参数
-MAKEFILE="tools/ninja/Makefile"
+# # 自动删除 tools/ninja/Makefile 中的 --no-rebuild 参数
+# MAKEFILE="tools/ninja/Makefile"
 
-# 检查文件是否存在
-if [ ! -f "$MAKEFILE" ]; then
-    echo "错误：找不到文件 $MAKEFILE"
-    exit 1
-fi
+# # 检查文件是否存在
+# if [ ! -f "$MAKEFILE" ]; then
+#     echo "错误：找不到文件 $MAKEFILE"
+#     exit 1
+# fi
 
-# 删除 --no-rebuild 参数
-sed -i 's/--no-rebuild//g' "$MAKEFILE"
+# # 删除 --no-rebuild 参数
+# sed -i 's/--no-rebuild//g' "$MAKEFILE"
 
-echo "已从 $MAKEFILE 中删除 '--no-rebuild' 参数。"
+# echo "已从 $MAKEFILE 中删除 '--no-rebuild' 参数。"
 
 # 最终判断
 if [ "$all_ok" = true ]; then
