@@ -56,8 +56,6 @@ jobs:
         chmod +x $ENV_SH && $ENV_SH
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo timedatectl set-timezone "$TZ"
-        docker image prune -a -f
-        docker container prune -f
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
