@@ -6,8 +6,8 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus-lts=y
 
 #cache
-CONFIG_DEVEL=y
-CONFIG_CCACHE=y
+# CONFIG_DEVEL is not set
+# CONFIG_CCACHE is not set
 
 #rootfs
 CONFIG_TARGET_ROOTFS_EXT4FS=n
