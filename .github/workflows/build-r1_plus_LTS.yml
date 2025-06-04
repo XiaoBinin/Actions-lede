@@ -25,8 +25,7 @@ env:
   ENV_SH: scripts/environment.sh
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  PLATFORM_FILE: configs/r1pluslts-with-docker.txt
-  CONFIG_FILE: configs/packages.txt
+  CONFIG_FILE: configs/lede/r1pluslts-with-docker.txt
   SETTINGS_SH: scripts/init-settings.sh
   PACKAGES_SH: scripts/packages.sh
   INSTALL5G_SH: scripts/install-5G.sh
@@ -88,7 +87,6 @@ jobs:
     - name: 导入补丁和配置 & 执行脚本
       run: |
         [ -d files ] && mv files openwrt/files || echo "files not found"
-        [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
         [ -f $CONFIG_5G ] && cat $CONFIG_5G >> openwrt/.config
         [ -d $PATCH_DIR ] && mv "$PATCH_DIR"/* openwrt/target/linux/rockchip/files/arch/arm64/boot/dts/rockchip
@@ -98,7 +96,6 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
-        chmod +x $GITHUB_WORKSPACE/$DTS_SH && $GITHUB_WORKSPACE/$DTS_SH
 
     # - name: 下载文件
     #   run: |
