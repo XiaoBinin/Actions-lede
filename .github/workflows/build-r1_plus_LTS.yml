@@ -89,7 +89,6 @@ jobs:
         [ -d files ] && mv files openwrt/files || echo "files not found"
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
         [ -f $CONFIG_5G ] && cat $CONFIG_5G >> openwrt/.config
-        [ -d $PATCH_DIR ] && mv "$PATCH_DIR"/* openwrt/target/linux/rockchip/files/arch/arm64/boot/dts/rockchip
         cd openwrt
         rm target/linux/rockchip/patches-*/991-arm64-dts-rockchip-add-more-cpu-operating-points-for.patch || true
         chmod +x $GITHUB_WORKSPACE/$INSTALL5G_SH && $GITHUB_WORKSPACE/$INSTALL5G_SH
