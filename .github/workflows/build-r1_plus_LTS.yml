@@ -25,7 +25,7 @@ env:
   ENV_SH: scripts/environment.sh
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: configs/lede/r1pluslts-with-docker.txt
+  CONFIG_FILE: configs/r1pluslts-with-docker.txt
   CONFIG_5G: configs/packages-5G.txt
   SETTINGS_SH: scripts/init-settings.sh
   PACKAGES_SH: scripts/packages.sh
