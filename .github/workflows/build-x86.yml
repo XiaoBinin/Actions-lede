@@ -66,7 +66,7 @@ jobs:
     - name: 克隆源码
       working-directory: /workdir
       run: |
-        git clone $REPO_URL --depth 1 -b $REPO_BRANCH openwrt
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: 开启缓存
@@ -148,6 +148,7 @@ jobs:
       if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
+        rm -rf dl/*
         echo -e "$(($(nproc)+1)) thread compile"
         make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
         make package/index
