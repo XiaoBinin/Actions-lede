@@ -8,6 +8,9 @@
 # Author: SuLingGG
 # Blog: https://mlapp.cn
 # 参考网址：https://github.com/zzcabc/OpenWrt_Action/blob/11208c3d5160128d22d14318772ec48f1918deb9/script/immortalwrt/diy2.sh
+# 插件网址：https://github.com/vernesong/OpenClash
+# 内核网址：https://github.com/MetaCubeX/mihomo
+# 规则网址：https://github.com/MetaCubeX/meta-rules-dat
 #=================================================
 
 
