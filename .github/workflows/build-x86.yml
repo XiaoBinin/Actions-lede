@@ -41,10 +41,11 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: 检查
+    - name: 检查代码
       uses: actions/checkout@main
 
     - name: 检测 /dev/sda1 分区是否存在
+      id: overlay
       run: |
         if [ ! -b /dev/sda1 ]; then
           echo "错误：/dev/sda1 分区不存在，无法继续执行 OverlayFS 相关操作，退出 Actions！"
@@ -52,7 +53,7 @@ jobs:
         fi
           echo "成功检测到 /dev/sda1 分区，继续执行后续步骤。"
 
-    - name: 初始化 环境
+    - name: 初始化环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -65,7 +66,7 @@ jobs:
         # 设置时区
         sudo timedatectl set-timezone "$TZ"
 
-    - name: 检查 空间使用情况 0
+    - name: 检查空间使用情况（初始化）
       if: (!cancelled())
       run: df -hT
 
@@ -88,20 +89,21 @@ jobs:
       run: |
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 检查 空间使用情况 1
+    - name: 检查空间使用情况（OverlayFS是否生效）
       if: (!cancelled())
       run: df -hT
 
-    - name: 克隆 源码
+    - name: 克隆源码
       working-directory: /workdir
       run: |
         git clone $REPO_URL --depth 1 -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 开启 缓存
+    - name: 开启缓存
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
+        toolchain: 'true'
         mixkey: 'x86'
         prefix: ${{ github.workspace }}/openwrt
 
@@ -111,7 +113,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: 导入 补丁和配置 & 执行脚本
+    - name: 导入补丁和配置 & 执行脚本
       run: |
         [ -d files ] && mv files openwrt/files || echo "files not found"
         [ -f $CONFIG_5G ] && cat $CONFIG_5G >> openwrt/.config
@@ -122,7 +124,7 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
-    # - name: 下载 文件
+    # - name: 下载文件
     #   run: |
     #     cd openwrt
     #     make defconfig
@@ -130,11 +132,11 @@ jobs:
     #     find dl -size -1024c -exec ls -l {} \;
     #     find dl -size -1024c -exec rm -f {} \;
 
-    - name: 检查 空间使用情况 2
+    - name: 检查空间使用情况（编译前）
       if: (!cancelled())
       run: df -hT
 
-    - name: 编译 工具链
+    - name: 编译工具链
       id: mtools
       run: |
         cd openwrt
@@ -143,11 +145,11 @@ jobs:
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 检查 空间使用情况 3_1
+    - name: 检查空间使用情况（工具链清理前）
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 清除 工具链编译临时文件...
+    - name: 清除工具链编译中间产物...
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
@@ -155,11 +157,11 @@ jobs:
         rm -rf build_dir/toolchain-*
         rm -rf tmp/*
 
-    - name: 检查 空间使用情况 3_2
+    - name: 检查空间使用情况（工具链清理后）
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 编译 内核
+    - name: 编译内核
       id: mkernel
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: |
@@ -169,27 +171,26 @@ jobs:
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 检查 空间使用情况 4
+    - name: 检查空间使用情况（内核占用）
       if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 编译 插件
+    - name: 编译插件
       id: mpackage
       if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        make defconfig
         make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
         make package/index
         make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 检查 空间使用情况 5_1
+    - name: 检查空间使用情况（插件占用）
       if: steps.mpackage.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 清除 插件编译临时文件
+    - name: 清除插件编译临时文件
       id: cpackage
       if: steps.mpackage.outputs.status == 'success' && !cancelled()
       run: |
@@ -197,22 +198,21 @@ jobs:
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 检查 空间使用情况 5_2
+    - name: 检查空间使用情况（插件清理后）
       if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 构建 根文件系统 + 打包固件
+    - name: 构建根文件系统 + 打包固件
       id: compile
       if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
-        make defconfig
-        make target/install || make target/install -j1 V=s
+        make target/install -j$(nproc) || make target/install -j1 V=s
         make json_overview_image_info
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 检查 空间使用情况 6
+    - name: 检查空间使用情况（打包占用）
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       run: df -hT
 
@@ -223,9 +223,9 @@ jobs:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
 
-    - name: 整理 文件
+    - name: 整理文件
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *.bin
@@ -236,14 +236,14 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传 固件目录
+    - name: 上传固件目录
       uses: actions/upload-artifact@main
       if: env.UPLOAD_FIRMWARE == 'true' && steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
-    - name: 生成 发布标签
+    - name: 生成发布标签
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status == 'success' && !cancelled()
       run: |
@@ -251,7 +251,7 @@ jobs:
         echo "release_tag=$(date +"%Y.%m.%d_X86-64")" >> $GITHUB_OUTPUT
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传 固件到发布
+    - name: 上传固件到发布
       uses: softprops/action-gh-release@v2.0.4
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
@@ -261,7 +261,7 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-    - name: 删除 以前发布的固件
+    - name: 删除以前发布的固件
       uses: dev-drprasad/delete-older-releases@v0.3.3
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
@@ -270,7 +270,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: 删除 以前的工作流程
+    - name: 删除以前的工作流程
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}

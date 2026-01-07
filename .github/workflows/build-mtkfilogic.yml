@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: 检查
+    - name: 检查代码
       uses: actions/checkout@main
 
     - name: 初始化环境
@@ -61,7 +61,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 检查空间使用情况1
+    - name: 检查空间使用情况（初始化）
       if: (!cancelled())
       run: df -hT
 
@@ -75,6 +75,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
+        toolchain: 'true'
         mixkey: 'filogic'
         prefix: ${{ github.workspace }}/openwrt
 
@@ -105,7 +106,7 @@ jobs:
     #     find dl -size -1024c -exec ls -l {} \;
     #     find dl -size -1024c -exec rm -f {} \;
 
-    - name: 空间使用情况2
+    - name: 检查空间使用情况（编译前）
       if: (!cancelled())
       run: df -hT
 
@@ -114,13 +115,12 @@ jobs:
       run: |
         cd openwrt
         make defconfig
-        echo -e "$(($(nproc)+1)) thread compile"
-        make tools/compile -j$(($(nproc)+1)) || make tools/compile -j1 V=s
+        echo -e "$(nproc) thread compile"
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况3_1
-      if: (!cancelled())
+    - name: 检查空间使用情况（工具链清理前）
+      if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: df -hT
 
     - name: 清除工具链编译中间产物...
@@ -129,9 +129,10 @@ jobs:
         cd openwrt
         rm -rf dl/*
         rm -rf build_dir/toolchain-*
+        rm -rf tmp/*
 
-    - name: 空间使用情况3_2
-      if: (!cancelled())
+    - name: 检查空间使用情况（工具链清理后）
+      if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: df -hT
 
     - name: 编译内核
@@ -139,12 +140,13 @@ jobs:
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
+        echo -e "$(nproc) thread compile"
+        make defconfig
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况4
-      if: (!cancelled())
+    - name: 检查空间使用情况（内核占用）
+      if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: df -hT
 
     - name: 编译插件
@@ -152,17 +154,17 @@ jobs:
       if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
+        echo -e "$(nproc) thread compile"
         make package/compile -j$(($(nproc)+1)) || make package/compile -j1 V=s
         make package/index
         make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况5
-      if: (!cancelled())
+    - name: 检查空间使用情况（插件占用）
+      if: steps.mpackage.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 清除插件编译文件
+    - name: 清除插件编译临时文件
       id: cpackage
       if: steps.mpackage.outputs.status == 'success' && !cancelled()
       run: |
@@ -170,23 +172,22 @@ jobs:
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况6
-      if: (!cancelled())
+    - name: 检查空间使用情况（插件清理后）
+      if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 编译固件
+    - name: 构建根文件系统 + 打包固件
       id: compile
       if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
         make target/install -j$(nproc) || make target/install -j1 V=s
         make json_overview_image_info
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况7
-      if: (!cancelled())
+    - name: 检查空间使用情况（打包占用）
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       run: df -hT
 
     - name: 上传 bin 目录
@@ -198,7 +199,7 @@ jobs:
 
     - name: 整理文件
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *.buildinfo 
@@ -210,12 +211,12 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 固件重命名
-      if: steps.organize.outputs.status == 'success'
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       shell: bash
       run: |
         cd openwrt/bin/targets/*/*
-        for file in *mediatek-filogic-*.bin; do
-          new_name=$(echo "$file" | sed 's/mediatek-filogic-//')
+        for file in *rockchip-armv8-*.gz; do
+          new_name=$(echo "$file" | sed 's/rockchip-armv8-//')
           mv -v "$file" "$new_name"
         done
 

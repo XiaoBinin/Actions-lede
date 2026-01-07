@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: 检查
+    - name: 检查代码
       uses: actions/checkout@main
 
     - name: 初始化环境
@@ -58,16 +58,15 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 检查空间使用情况1
+    - name: 检查空间使用情况（初始化）
       if: (!cancelled())
       run: df -hT
 
     - name: 克隆源码
       working-directory: /workdir
       run: |
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone $REPO_URL --depth 1 -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        cd openwrt
 
     - name: 开启缓存
       uses: klever1988/cachewrtbuild@main
@@ -109,7 +108,7 @@ jobs:
         make -j$(($(nproc)+1)) || make -j$(nproc) || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况2
+    - name: 空间使用情况（编译占用）
       if: (!cancelled())
       run: df -hT
 
@@ -122,7 +121,7 @@ jobs:
 
     - name: 整理文件
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *.buildinfo 
@@ -133,7 +132,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 固件重命名
-      if: steps.organize.outputs.status == 'success'
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       shell: bash
       run: |
         cd openwrt/bin/targets/*/*
