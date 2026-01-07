@@ -57,7 +57,5 @@ sudo rm -rf /opt/ghc
 sudo rm -rf /usr/local/share/boost
 sudo rm -rf /var/lib/apt/lists/*
 df -h
-# 清理 Docker
-docker system prune -af --volumes
 # 删除 GitHub Actions 工具缓存
 sudo rm -rf /opt/hostedtoolcache
