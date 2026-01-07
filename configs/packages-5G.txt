@@ -6,7 +6,7 @@ CONFIG_PACKAGE_luci-app-qmodem_USE_TOM_CUSTOMIZED_QUECTEL_CM=y
 CONFIG_PACKAGE_luci-app-qmodem_USING_QWRT_QUECTEL_CM_5G=y
 # CONFIG_PACKAGE_luci-app-qmodem_USING_NORMAL_QUECTEL_CM is not set
 # CONFIG_PACKAGE_luci-app-qmodem-hc is not set
-# CONFIG_PACKAGE_luci-app-qmodem-mwan is not set
+# CONFIG_PACKAGE_luci-app-qmodem-mwan=y
 CONFIG_PACKAGE_luci-app-qmodem-sms=y
 CONFIG_PACKAGE_luci-app-qmodem-ttl=y
 CONFIG_PACKAGE_luci-i18n-qmodem-sms-zh-cn=y
