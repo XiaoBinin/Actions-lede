@@ -42,27 +42,11 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: 检查
+    - name: 检查 代码
       uses: actions/checkout@main
 
-    - name: 初始化环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        chmod +x $FREE_DISK_SH && $FREE_DISK_SH
-        sudo -E apt-get -qq update -y
-        sudo -E apt-get -qq full-upgrade -y
-        chmod +x $ENV_SH && $ENV_SH
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo timedatectl set-timezone "$TZ"
-        docker image prune -a -f
-        docker container prune -f
-
-    - name: 检查空间使用情况 0
-      if: (!cancelled())
-      run: df -hT
-
     - name: 检测 /dev/sda1 分区是否存在
+      id: overlay
       run: |
         if [ ! -b /dev/sda1 ]; then
           echo "错误：/dev/sda1 分区不存在，无法继续执行 OverlayFS 相关操作，退出 Actions！"
@@ -70,33 +54,51 @@ jobs:
         fi
           echo "成功检测到 /dev/sda1 分区，继续执行后续步骤。"
 
+    - name: 初始化 环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        chmod +x $FREE_DISK_SH && $FREE_DISK_SH
+        sudo -E apt-get -qq update -y
+        sudo -E apt-get -qq full-upgrade -y
+        chmod +x $ENV_SH && $ENV_SH
+        # 设置时区
+        sudo timedatectl set-timezone "$TZ"
+
+    - name: 检查 空间使用情况（初始化）
+      if: (!cancelled())
+      run: df -hT
+
     - name: 创建 OverlayFS 目录结构
       run: |
         sudo mkdir -p /overlay/lower
         sudo mkdir -p /mnt/overlay/upper
         sudo mkdir -p /mnt/overlay/work
         sudo mkdir -p /workdir
+        sudo chmod 777 /overlay/lower
+        sudo chmod 777 /mnt/overlay/upper
 
     - name: 挂载 OverlayFS 合并分区
       run: |
-        sudo mount -t overlay overlay -o lowerdir=/overlay/lower,upperdir=/mnt/overlay/upper,workdir=/mnt/overlay/work /workdir
+        sudo mount -t overlay overlay \
+         -o rw,lowerdir=/overlay/lower,upperdir=/mnt/overlay/upper,workdir=/mnt/overlay/work /workdir
         mount | grep overlay
 
     - name: 设置 /workdir 权限
       run: |
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 检查空间使用情况 1
+    - name: 检查 空间使用情况（OverlayFS是否生效）
       if: (!cancelled())
       run: df -hT
 
-    - name: 克隆源码
+    - name: 克隆 源码
       working-directory: /workdir
       run: |
         git clone $REPO_URL --depth 1 -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 开启缓存
+    - name: 开启 缓存
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
@@ -122,7 +124,7 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/$PACKAGES_SH && $GITHUB_WORKSPACE/$PACKAGES_SH
         chmod +x $GITHUB_WORKSPACE/$CLASH_CORE_SH && $GITHUB_WORKSPACE/$CLASH_CORE_SH
 
-    # - name: 下载文件
+    # - name: 下载 文件
     #   run: |
     #     cd openwrt
     #     make defconfig
@@ -130,7 +132,7 @@ jobs:
     #     find dl -size -1024c -exec ls -l {} \;
     #     find dl -size -1024c -exec rm -f {} \;
 
-    - name: 检查空间使用情况 2
+    - name: 检查 空间使用情况（编译前）
       if: (!cancelled())
       run: df -hT
 
@@ -143,7 +145,7 @@ jobs:
         make toolchain/compile -j$(($(nproc)+1)) || make toolchain/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况3_1
+    - name: 检查 空间使用情况（工具链清理前）
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: df -hT
 
@@ -155,24 +157,25 @@ jobs:
         rm -rf build_dir/toolchain-*
         rm -rf tmp/*
 
-    - name: 空间使用情况3_2
+    - name: 检查 空间使用情况（工具链清理后）
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 编译 内核以及清除临时文件
+    - name: 编译 内核
       id: mkernel
       if: steps.mtools.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
+        make defconfig
         make target/linux/compile -j$(($(nproc)+1)) || make target/linux/compile -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况4
+    - name: 检查 空间使用情况（内核占用）
       if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: df -hT
 
-    - name: 编译插件
+    - name: 编译 插件
       id: mpackage
       if: steps.mkernel.outputs.status == 'success' && !cancelled()
       run: |
@@ -183,7 +186,7 @@ jobs:
         make package/install -j$(nproc) || make package/install -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况5
+    - name: 检查 空间使用情况（插件占用）
       if: steps.mpackage.outputs.status == 'success' && !cancelled()
       run: df -hT
 
@@ -195,7 +198,7 @@ jobs:
         rm -rf build_dir/target-*/host
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况6
+    - name: 检查 空间使用情况（插件清理后）
       if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: df -hT
 
@@ -205,12 +208,11 @@ jobs:
       run: |
         cd openwrt
         make target/install || make target/install -j1 V=s
-        make image
         make json_overview_image_info
         make checksum
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 空间使用情况7
+    - name: 检查 空间使用情况（打包占用）
       if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
       run: df -hT
 
@@ -223,7 +225,7 @@ jobs:
 
     - name: 整理 文件
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *.bin
@@ -235,7 +237,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 固件 重命名
-      if: steps.organize.outputs.status == 'success'
+      if: steps.organize.outputs.status == 'success' && !cancelled()
       shell: bash
       run: |
         cd openwrt/bin/targets/*/*
