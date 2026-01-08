@@ -215,8 +215,8 @@ jobs:
       shell: bash
       run: |
         cd openwrt/bin/targets/*/*
-        for file in *rockchip-armv8-*.gz; do
-          new_name=$(echo "$file" | sed 's/rockchip-armv8-//')
+        for file in *mediatek-filogic-*.bin; do
+          new_name=$(echo "$file" | sed 's/mediatek-filogic-//')
           mv -v "$file" "$new_name"
         done
 
