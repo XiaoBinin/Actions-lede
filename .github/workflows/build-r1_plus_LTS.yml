@@ -185,7 +185,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 检查空间使用情况（打包占用）
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: df -hT
 
     - name: 上传 bin 目录
