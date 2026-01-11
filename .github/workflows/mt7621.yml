@@ -207,11 +207,15 @@ jobs:
         files: ${{ env.FIRMWARE }}/*
 
     - name: 导入插件配置（第二次sysupgrade）
+      id: config2
+      if: steps.tag.outputs.status == 'success' && !cancelled()
       run: |
         [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
+        echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 编译固件（第二次sysupgrade）
-      id: compile
+      id: compile2
+      if: steps.config2.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
         make defconfig
@@ -224,8 +228,8 @@ jobs:
       run: df -hT
 
     - name: 整理文件（第二次sysupgrade）
-      id: organize
-      if: steps.compile.outputs.status == 'success' && !cancelled()
+      id: organize2
+      if: steps.compile2.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf *factory.bin
@@ -237,7 +241,8 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 固件重命名（第二次sysupgrade）
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+      id: rename2
+      if: steps.organize2.outputs.status == 'success' && !cancelled()
       shell: bash
       run: |
         cd openwrt/bin/targets/*/*
@@ -248,7 +253,7 @@ jobs:
 
     - name: 上传固件到发布（第二次sysupgrade）
       uses: softprops/action-gh-release@v2.0.4
-      if: steps.tag.outputs.status == 'success' && !cancelled()
+      if: steps.rename2.outputs.status == 'success' && !cancelled()
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
