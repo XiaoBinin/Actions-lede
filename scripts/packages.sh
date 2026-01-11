@@ -43,6 +43,9 @@ git clone -b master --depth 1 https://github.com/immortalwrt/homeproxy.git
 #ssrp
 # git clone -b master --depth 1 https://github.com/fw876/helloworld.git
 
+# VIKINGYFY/packages
+git clone -b main --depth 1 https://github.com/VIKINGYFY/packages.git
+
 #passwall
 git clone -b main --depth 1 https://github.com/xiaorouji/openwrt-passwall.git
 
