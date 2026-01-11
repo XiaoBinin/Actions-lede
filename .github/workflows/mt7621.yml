@@ -27,6 +27,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   PLATFORM_FILE: configs/ramips-mt7621.txt
+  CONFIG_FILE: configs/mt7621-packages.txt
   SETTINGS_SH: scripts/init-settings.sh
   PACKAGES_SH: scripts/packages.sh
   UPLOAD_BIN_DIR: false
@@ -122,7 +123,6 @@ jobs:
 
     - name: 导入补丁和配置 & 执行脚本
       run: |
-        [ -d files ] && mv files openwrt/files || echo "files not found"
         [ -f $PLATFORM_FILE ] && cat $PLATFORM_FILE >> openwrt/.config
         cd openwrt
         chmod +x $GITHUB_WORKSPACE/$SETTINGS_SH && $GITHUB_WORKSPACE/$SETTINGS_SH
@@ -165,6 +165,7 @@ jobs:
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
+        rm -rf *sysupgrade.bin
         rm -rf *.buildinfo 
         rm -rf *.json 
         rm -rf *.manifest 
@@ -198,6 +199,54 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件到发布
+      uses: softprops/action-gh-release@v2.0.4
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: 导入插件配置（第二次sysupgrade）
+      run: |
+        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
+
+    - name: 编译固件（第二次sysupgrade）
+      id: compile
+      run: |
+        cd openwrt
+        make defconfig
+        echo -e "$(nproc) thread compile"
+        make -j$(nproc) || make -j1 V=s
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 空间使用情况（第二次编译占用）
+      if: (!cancelled())
+      run: df -hT
+
+    - name: 整理文件（第二次sysupgrade）
+      id: organize
+      if: steps.compile.outputs.status == 'success' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf *factory.bin
+        rm -rf *.buildinfo 
+        rm -rf *.json 
+        rm -rf *.manifest 
+        rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 固件重命名（第二次sysupgrade）
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      shell: bash
+      run: |
+        cd openwrt/bin/targets/*/*
+        for file in *ramips-mt7621-*.bin; do
+          new_name=$(echo "$file" | sed 's/ramips-mt7621-//')
+          mv -v "$file" "$new_name"
+        done
+
+    - name: 上传固件到发布（第二次sysupgrade）
       uses: softprops/action-gh-release@v2.0.4
       if: steps.tag.outputs.status == 'success' && !cancelled()
       with:
