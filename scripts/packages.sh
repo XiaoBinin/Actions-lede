@@ -1,23 +1,12 @@
 #!/bin/bash
 
 #删除feeds中的插件
-# rm -rf ./feeds/ssrp/ipt2socks
-# rm -rf ./feeds/ssrp/hysteria
-# rm -rf ./feeds/ssrp/v2ray-plugin
-# rm -rf ./feeds/ssrp/chinadns-ng
-# rm -rf ./feeds/ssrp/dns2tcp
-# rm -rf ./feeds/ssrp/naiveproxy
-# rm -rf ./feeds/ssrp/shadowsocksr-libev
-# rm -rf ./feeds/ssrp/v2ray-plugin
 # rm -rf ./feeds/packages/net/smartdns
-rm -rf ./feeds/packages/net/chinadns-ng
-rm -rf ./feeds/packages/net/sing-box
-rm -rf ./feeds/packages/net/xray-core
-# rm -rf ./feeds/luci/applications/luci-app-mosdns
-# rm -rf ./feeds/luci/applications/luci-app-smartdns
-rm -rf ./feeds/luci/applications/luci-app-passwall
-rm -rf ./feeds/luci/applications/luci-app-passwall2
-rm -rf ./feeds/luci/applications/luci-app-openclash
+rm -rf ./feeds/packages/net/{geoview,chinadns-ng,hysteria,v2ray-geodata}
+rm -rf ./feeds/packages/net/{shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev}
+rm -rf ./feeds/packages/net/{sing-box,v2ray-geodata,v2ray-plugin,xray-core}
+# rm -rf ./feeds/luci/applications/{luci-app-mosdns,luci-app-smartdns}
+rm -rf ./feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-openclash,luci-app-homeproxy}
 
 
 #克隆插件
