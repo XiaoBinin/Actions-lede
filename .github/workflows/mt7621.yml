@@ -212,7 +212,7 @@ jobs:
       run: |
         cd openwrt
         rm -rf .config
-        cat $GITHUB_WORKSPACE/$CONFIG_FILE >> openwrt/.config
+        cat $GITHUB_WORKSPACE/$CONFIG_FILE >> .config
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 编译固件（第二次sysupgrade）
