@@ -16,8 +16,8 @@ permissions: write-all
 on:
   repository_dispatch:
   workflow_dispatch:
-  schedule:
-   - cron: 0 20 * * 2
+  # schedule:
+  #  - cron: 0 20 * * 2
    #     分,时,日,月,周。每周三 20时执行一次 (UTC时间)
   
 env:
@@ -53,10 +53,10 @@ jobs:
         sudo -E apt-get -qq update -y
         sudo -E apt-get -qq full-upgrade -y
         chmod +x $ENV_SH && $ENV_SH
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo rm -rf /etc/apt/sources.list.d/*
+        sudo rm -rf /var/lib/apt/lists/*
+        # 设置时区
         sudo timedatectl set-timezone "$TZ"
-        docker image prune -a -f
-        docker container prune -f
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
@@ -74,6 +74,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
+        toolchain: 'true'
         mixkey: 'armv8'
         prefix: ${{ github.workspace }}/openwrt
 
@@ -178,7 +179,7 @@ jobs:
       if: steps.cpackage.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt
-        echo -e "$(($(nproc)+1)) thread compile"
+        echo -e "$(nproc) thread compile"
         make target/install -j$(nproc) || make target/install -j1 V=s
         make json_overview_image_info
         make checksum
