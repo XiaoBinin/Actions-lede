@@ -210,7 +210,9 @@ jobs:
       id: config2
       if: steps.tag.outputs.status == 'success' && !cancelled()
       run: |
-        [ -f $CONFIG_FILE ] && cat $CONFIG_FILE >> openwrt/.config
+        cd openwrt
+        rm -rf .config
+        cat $GITHUB_WORKSPACE/$CONFIG_FILE >> openwrt/.config
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 编译固件（第二次sysupgrade）
@@ -256,7 +258,7 @@ jobs:
       if: steps.rename2.outputs.status == 'success' && !cancelled()
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
-        body_path: release.txt
+        append: true
         files: ${{ env.FIRMWARE }}/*
 
     - name: 删除以前发布的固件
