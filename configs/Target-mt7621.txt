@@ -53,12 +53,9 @@ CONFIG_PACKAGE_luci-app-vlmcsd=y
 CONFIG_PACKAGE_luci-app-wolplus=y
 
 #内核模块调整（我的HC5962用）
+CONFIG_PACKAGE_kmod-usb-net-rndis=y
+# usb rndis（远程网络驱动接口规范）支持，用于 USB 共享网络（如手机 USB 共享）
 CONFIG_PACKAGE_kmod-usb-storage=y
-
-#组件调整
-CONFIG_PACKAGE_htop=y
-
-
 
 # 删除插件
 CONFIG_PACKAGE_luci-app-accesscontrol=n
@@ -68,6 +65,8 @@ CONFIG_PACKAGE_luci-app-ksmbd=n
 CONFIG_PACKAGE_luci-app-vsftpd=n
 CONFIG_PACKAGE_luci-app-wol=n
 
+#组件调整
+CONFIG_PACKAGE_htop=y
 CONFIG_PACKAGE_automount=n
 CONFIG_PACKAGE_autosamba=n
 CONFIG_PACKAGE_ddns-scripts_aliyun=n

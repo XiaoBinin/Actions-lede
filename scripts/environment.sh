@@ -1,3 +1,5 @@
+sudo apt update -qq
+sudo apt full-upgrade -qq -y
 sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
 bzip2 ccache clang cmake cpio curl device-tree-compiler dos2unix flex gawk gcc-multilib g++-multilib gettext \
 genisoimage git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev \

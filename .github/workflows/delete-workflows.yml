@@ -1,21 +1,28 @@
-name: Delete Old Workflows 删除过时工作流程
+name: delete-workflows
 
 permissions: write-all
+#开启写权限，防止无法上传到release
 
 on:
   workflow_dispatch:
-
-  #schedule:
-   # - cron: '0 5 * * 2'
+  schedule:
+   - cron: '0 20 * * 6'
+  #     分,时,日,月,周。每周日 20时执行一次 (UTC时间)
 
 jobs:
   del_runs:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
+      - name: 删除以前发布的固件
+        uses: dev-drprasad/delete-older-releases@v0.3.4
+        with:
+          keep_latest: 30
+          delete_tags: true
+
+      - name: 删除以前的工作流程
+        uses: Mattraks/delete-workflow-runs@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           retain_days: 1
-          keep_minimum_runs: 2
+          keep_minimum_runs: 3
