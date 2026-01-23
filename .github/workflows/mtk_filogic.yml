@@ -112,6 +112,8 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
         ccache: 'true'
+        mixkey: 'filogic'
+        prefix: ${{ github.workspace }}/openwrt
 
     - name: 开启CCACHE配置
       run: |
