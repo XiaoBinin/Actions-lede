@@ -36,6 +36,7 @@ git clone -b main --depth 1 https://github.com/gdy666/luci-app-lucky.git
 # smartdns
 git clone -b master --depth 1 https://github.com/pymumu/luci-app-smartdns.git
 git clone -b master --depth 1 https://github.com/pymumu/smartdns.git
+sed -i 's@include ../../lang/rust/rust-package.mk@include $(TOPDIR)/feeds/packages/lang/rust/rust-package.mk@g' /smartdns/package/openwrt/Makefile
 
 # ssrp
 # git clone -b master --depth 1 https://github.com/fw876/helloworld.git
