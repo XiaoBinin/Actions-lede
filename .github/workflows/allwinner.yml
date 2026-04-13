@@ -17,8 +17,8 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-   - cron: 0 20 * * 1
-   #     分,时,日,月,周。每周二 20时执行一次 (UTC时间)
+   - cron: 0 20 * * 0
+   #     分,时,日,月,周。每周一 20时执行一次 (UTC时间)
   
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
