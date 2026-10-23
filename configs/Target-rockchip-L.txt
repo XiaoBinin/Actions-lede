@@ -1,7 +1,9 @@
-#target
+# 设备平台
 CONFIG_TARGET_rockchip=y
 CONFIG_TARGET_rockchip_armv8=y
 CONFIG_TARGET_MULTI_PROFILE=y
+
+# 设备列表（按字母序）
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_ariaboard_photonicat=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_ariaboard_photonicat2=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_armsom_sige1=y
@@ -17,15 +19,15 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r76s=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-h28k=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-h66k=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_e20c=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k-pro=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-5-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus-lts=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k-pro=y
 
-#rootfs
-CONFIG_TARGET_ROOTFS_EXT4FS=n
+# rootfs
+# CONFIG_TARGET_ROOTFS_EXT4FS is not set
 CONFIG_TARGET_ROOTFS_PARTSIZE=300
 
-#luci
+# luci
 CONFIG_PACKAGE_luci-app-cpufreq=y

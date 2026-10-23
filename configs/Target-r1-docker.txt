@@ -1,15 +1,17 @@
-#target
+# 设备平台
 CONFIG_TARGET_rockchip=y
 CONFIG_TARGET_rockchip_armv8=y
 CONFIG_TARGET_MULTI_PROFILE=y
+
+# 设备列表（只保留 R1 Plus 系列）
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus-lts=y
 
-#rootfs
-CONFIG_TARGET_ROOTFS_EXT4FS=n
+# rootfs
+# CONFIG_TARGET_ROOTFS_EXT4FS is not set
 CONFIG_TARGET_ROOTFS_PARTSIZE=300
 
-#luci
+# luci
 CONFIG_PACKAGE_luci-app-cpufreq=y
-# 增加dockerman
+# 这个平台专门多带一个 docker
 CONFIG_PACKAGE_luci-app-dockerman=y

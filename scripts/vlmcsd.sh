@@ -1,20 +1,26 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# 用 patches/vlmcsd 覆盖 feeds 里的 vlmcsd（lede 自带版本功能不全）
+# 必须在 openwrt 源码根目录执行（build.yml 已保证）
+#
+set -euo pipefail
 
-echo "开始替换 feeds中的vlmcsd ..."
-echo "========================================"
+SRC="${GITHUB_WORKSPACE:?GITHUB_WORKSPACE 未设置}/patches/vlmcsd"
+DST="feeds/packages/net/vlmcsd"
 
-rm -rf openwrt/feeds/packages/net/vlmcsd
-cp -r patches/vlmcsd openwrt/feeds/packages/net/
-
-echo "===== 查看vlmcsd文件夹是否存在 ====="
-ls -l openwrt/feeds/packages/net/ | grep vlmcsd
-
-# 额外验证Makefile是否存在（核心文件）
-if [ -f "openwrt/feeds/packages/net/vlmcsd/Makefile" ]; then
-  echo "✅ vlmcsd目录替换成功，Makefile存在"
-else
-  echo "❌ vlmcsd目录替换失败，Makefile不存在"
+if [ ! -d "$SRC" ]; then
+  echo "::error::找不到 ${SRC}"
+  exit 1
 fi
 
-echo "========================================"
-echo "vlmcsd 替换完成！"
+echo "==> 替换 feeds/packages/net/vlmcsd"
+rm -rf "$DST"
+cp -r "$SRC" "$DST"
+
+if [ ! -f "$DST/Makefile" ]; then
+  echo "::error::vlmcsd 替换失败（Makefile 不存在）"
+  exit 1
+fi
+
+echo "    vlmcsd：$(sed -n 's/^PKG_RELEASE:=//p' "$DST/Makefile" | head -n 1)（PKG_RELEASE）"
+echo "✅ vlmcsd.sh 完成"

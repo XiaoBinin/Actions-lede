@@ -1,7 +1,12 @@
-#target
+# 设备平台
 CONFIG_TARGET_rockchip=y
 CONFIG_TARGET_rockchip_armv8=y
 CONFIG_TARGET_MULTI_PROFILE=y
+
+# 设备列表（全量，按字母序）
+# 说明：这份是"全量设备清单"，目前没有 workflow 直接引用
+#      （rockchip.yml 用的是 configs/Target-rockchip-L.txt，设备少、编得快）。
+#      想编全量就把 rockchip.yml 的 configs 换成这个文件；也可以照 Filogic 的做法拆成几份用 matrix 并行。
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_ariaboard_photonicat=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_ariaboard_photonicat2=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_armsom_sige1=y
@@ -9,6 +14,7 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_ezpro_mrkaio-m68s=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_ezpro_mrkaio-m68s-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_fastrhino_r66s=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_fastrhino_r68s=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_firefly_station-p2=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopc-t6=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r2c=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r2c-plus=y
@@ -22,7 +28,6 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r5s=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r6c=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r6s=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r76s=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_firefly_station-p2=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-h28k=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-h66k=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-h68k=y
@@ -30,20 +35,20 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-h69k=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_hinlink_opc-ht2=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_lyt_t68m=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_e20c=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28c=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k=y
+CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k-pro=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-5=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-5-max=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-5-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-5-ultra=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus=y
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_xunlong_orangepi-r1-plus-lts=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28c=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k=y
-CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_widora_mangopi-m28k-pro=y
 
-#rootfs
-CONFIG_TARGET_ROOTFS_EXT4FS=n
+# rootfs
+# CONFIG_TARGET_ROOTFS_EXT4FS is not set
 CONFIG_TARGET_ROOTFS_PARTSIZE=300
 
-#luci
+# luci
 CONFIG_PACKAGE_luci-app-cpufreq=y

@@ -1,32 +1,18 @@
+# 设备平台
 CONFIG_TARGET_ramips=y
 CONFIG_TARGET_ramips_mt7621=y
 CONFIG_TARGET_MULTI_PROFILE=y
 
+# 组件调整
 CONFIG_TARGET_INITRAMFS_COMPRESSION_XZ=y
 CONFIG_TARGET_KERNEL_PARTSIZE=12
 CONFIG_TARGET_ROOTFS_PARTSIZE=64
 
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-ac57u=n
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-ac65p=n
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-ac85p=n
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-n56u-b1=n
-
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr1300=n
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr2100=n
-
-
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_glinet_gl-mt1300=n
-
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_h3c_tx1800-plus=n
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_h3c_tx1801-plus=n
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_h3c_tx1806=n
-
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_hilink_hlk-7621a=n
+# 设备列表
+# 说明：不编的型号统一写成 kconfig 标准的 "# ... is not set"，
+# 原来写的是 "CONFIG_TARGET_DEVICE_xxx=n"，取决于 kconfig 版本，最坏情况是静默失效。
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_hiwifi_hc5962=y
-
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_jcg_q20=y
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_jdcloud_re-cp-02=n
-
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-3g=y
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-3g-v2=y
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-3-pro=y
@@ -35,41 +21,54 @@ CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-4a-gigabit=y
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-ac2100=y
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_mi-router-cr660x=y
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaomi_redmi-router-ac2100=y
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaoyu_xy-c5=n
 
-# 有空行是因为中间还有型号，不知道要不要加
+# 明确不编的型号（保留清单方便以后打开）
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-ac57u is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-ac65p is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-ac85p is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-n56u-b1 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr1300 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr2100 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_glinet_gl-mt1300 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_h3c_tx1800-plus is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_h3c_tx1801-plus is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_h3c_tx1806 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_hilink_hlk-7621a is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_jdcloud_re-cp-02 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_xiaoyu_xy-c5 is not set
 
+# 极简版插件（放过这个 CPU）
 
-
-#极简版插件（放过这个CPU吧）
 # 科学插件调整
 CONFIG_PACKAGE_luci-app-homeproxy=y
-#主题调整
+
+# 主题调整
 CONFIG_PACKAGE_luci-theme-design=y
-#luci插件调整
+
+# luci 插件调整
 CONFIG_PACKAGE_luci-app-ramfree=y
 CONFIG_PACKAGE_luci-app-upnp=y
 CONFIG_PACKAGE_luci-app-vlmcsd=y
 CONFIG_PACKAGE_luci-app-wolplus=y
 
-#内核模块调整（我的HC5962用）
+# 内核模块调整（HC5962 用）
 CONFIG_PACKAGE_kmod-usb-net-rndis=y
 # usb rndis（远程网络驱动接口规范）支持，用于 USB 共享网络（如手机 USB 共享）
 CONFIG_PACKAGE_kmod-usb-storage=y
+# USB 存储设备驱动，用于挂载 U 盘、移动硬盘、SD 卡等
 
-# 删除插件
-CONFIG_PACKAGE_luci-app-accesscontrol=n
-CONFIG_PACKAGE_luci-app-arpbind=n
-CONFIG_PACKAGE_luci-app-ddns=n
-CONFIG_PACKAGE_luci-app-ksmbd=n
-CONFIG_PACKAGE_luci-app-vsftpd=n
-CONFIG_PACKAGE_luci-app-wol=n
+# 明确不编的插件
+# CONFIG_PACKAGE_luci-app-accesscontrol is not set
+# CONFIG_PACKAGE_luci-app-arpbind is not set
+# CONFIG_PACKAGE_luci-app-ddns is not set
+# CONFIG_PACKAGE_luci-app-ksmbd is not set
+# CONFIG_PACKAGE_luci-app-vsftpd is not set
+# CONFIG_PACKAGE_luci-app-wol is not set
 
-#组件调整
+# 组件调整
 CONFIG_PACKAGE_htop=y
-CONFIG_PACKAGE_automount=n
-CONFIG_PACKAGE_autosamba=n
-CONFIG_PACKAGE_ddns-scripts_aliyun=n
-CONFIG_PACKAGE_ddns-scripts_dnspod=n
-CONFIG_PACKAGE_vsftpd-alt=n
-
+# CONFIG_PACKAGE_automount is not set
+# CONFIG_PACKAGE_autosamba is not set
+# CONFIG_PACKAGE_ddns-scripts_aliyun is not set
+# CONFIG_PACKAGE_ddns-scripts_dnspod is not set
+# CONFIG_PACKAGE_vsftpd-alt is not set

@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#
+# 预置 OpenClash 需要的 mihomo(Meta) 内核和规则库
+# 用法: preset-clash-core.sh <amd64|arm64>
+# 必须在 openwrt 源码根目录执行（build.yml 已保证），产物写进 files/ 随固件打包
+#
+set -euo pipefail
+
+ARCH="${1:?用法: preset-clash-core.sh <amd64|arm64>}"
+
+case "$ARCH" in
+  amd64) MIHOMO_PATTERN='mihomo-linux-amd64-compatible-alpha-.*\.gz' ;;
+  arm64) MIHOMO_PATTERN='mihomo-linux-arm64-alpha-.*\.gz' ;;
+  *)
+    echo "::error::不支持的架构: ${ARCH}（只支持 amd64 / arm64）" >&2
+    exit 1
+    ;;
+esac
+
+CORE_DIR="files/etc/openclash/core"
+mkdir -p "$CORE_DIR"
+
+# fetch <url> <输出文件>：下载并校验非空
+fetch() {
+  local url="$1" out="$2"
+  echo "==> 下载 $(basename "$out")"
+  if ! wget -q --tries=3 --timeout=300 -O "${out}.part" "$url"; then
+    echo "::error::下载失败: ${url}" >&2
+    rm -f "${out}.part"
+    exit 1
+  fi
+  if [ ! -s "${out}.part" ]; then
+    echo "::error::下载内容为空: ${url}" >&2
+    rm -f "${out}.part"
+    exit 1
+  fi
+  mv -f "${out}.part" "$out"
+}
+
+echo "==> 获取 mihomo 最新 alpha 版本下载地址"
+API_URL="https://api.github.com/repos/MetaCubeX/mihomo/releases/tags/Prerelease-Alpha"
+AUTH_HEADER=()
+if [ -n "${GH_TOKEN:-}" ]; then
+  AUTH_HEADER=(-H "Authorization: Bearer ${GH_TOKEN}")
+fi
+
+API_JSON=$(curl -fsSL "${AUTH_HEADER[@]}" "$API_URL") || true
+META_URL=$(printf '%s' "$API_JSON" \
+  | grep -o "\"browser_download_url\": *\"[^\"]*${MIHOMO_PATTERN}\"" \
+  | head -n 1 | cut -d'"' -f4 || true)
+
+if [ -z "${META_URL}" ]; then
+  echo "::error::没拿到 mihomo 下载地址（API 限流或 release 结构变了）" >&2
+  exit 1
+fi
+echo "     ${META_URL}"
+
+echo "==> 下载并解压内核"
+if ! wget -q --tries=3 --timeout=300 -O "${CORE_DIR}/clash_meta.gz" "$META_URL"; then
+  echo "::error::内核下载失败: ${META_URL}" >&2
+  exit 1
+fi
+if ! gunzip -c "${CORE_DIR}/clash_meta.gz" > "${CORE_DIR}/clash_meta"; then
+  echo "::error::clash_meta 解压失败（下载到的可能不是 gzip）" >&2
+  exit 1
+fi
+rm -f "${CORE_DIR}/clash_meta.gz"
+
+if [ ! -s "${CORE_DIR}/clash_meta" ]; then
+  echo "::error::clash_meta 解压后为空" >&2
+  exit 1
+fi
+chmod +x "${CORE_DIR}/clash_meta"
+echo "     大小: $(du -h "${CORE_DIR}/clash_meta" | cut -f1)"
+
+echo "==> 下载规则库"
+GEO_BASE="https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest"
+fetch "${GEO_BASE}/geoip.dat"          files/etc/openclash/GeoIP.dat
+fetch "${GEO_BASE}/geosite.dat"        files/etc/openclash/GeoSite.dat
+fetch "${GEO_BASE}/country.mmdb"       files/etc/openclash/Country.mmdb
+fetch "${GEO_BASE}/GeoLite2-ASN.mmdb"  files/etc/openclash/GeoLite2-ASN.mmdb
+
+echo "✅ OpenClash 内核与规则库预置完成"
