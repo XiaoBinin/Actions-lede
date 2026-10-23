@@ -21,8 +21,6 @@ CONFIG_PACKAGE_kmod-scsi-core=y
 # 文件系统
 CONFIG_PACKAGE_kmod-fs-ext4=y
 # EXT4 文件系统支持（常用于 Linux 分区）
-CONFIG_PACKAGE_kmod-fs-ntfs=y
-# 旧版 NTFS 文件系统支持（只读模式）
 CONFIG_PACKAGE_kmod-fs-ntfs3=y
 # 新版 NTFS3 驱动（支持 NTFS 读写，推荐使用）
 CONFIG_PACKAGE_kmod-fs-vfat=y
