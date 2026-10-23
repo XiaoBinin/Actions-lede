@@ -46,7 +46,7 @@ clone https://github.com/Openwrt-Passwall/openwrt-passwall2.git luci-app-passwal
 # mosdns
 clone https://github.com/sbwml/luci-app-mosdns.git luci-app-mosdns -b v5
 # 网络测速
-clone https://github.com/sirpdboy/luci-app-netspeedtest.git luci-app-netspeedtest -b master
+clone https://github.com/muink/luci-app-netspeedtest.git luci-app-netspeedtest -b master
 # openclash
 clone https://github.com/vernesong/OpenClash.git OpenClash -b master
 # 透明代理系
