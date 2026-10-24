@@ -52,7 +52,13 @@ clone https://github.com/vernesong/OpenClash.git OpenClash -b master
 # 透明代理系
 clone https://github.com/nikkinikki-org/OpenWrt-nikki.git luci-app-nikki -b main
 clone https://github.com/nikkinikki-org/OpenWrt-momo.git luci-app-momo -b main
-clone https://github.com/QiuSimons/luci-app-daed.git luci-app-daed -b master
+# 流量监控（luci 前端 + bandix 核心包；核心是预编译二进制，按架构从 release 下载）
+clone https://github.com/timsaya/luci-app-bandix.git luci-app-bandix -b main
+clone https://github.com/timsaya/openwrt-bandix.git openwrt-bandix -b main
+# 温度显示（状态页）
+clone https://github.com/gSpotx2f/luci-app-temp-status.git luci-app-temp-status -b master
+# 网盘（alist 的继任者，取代已失效的 aliyundrive-webdav）
+clone https://github.com/sbwml/luci-app-openlist2.git luci-app-openlist2 -b main
 
 # smartdns 的 OpenWrt Makefile 里 include 的是 feed 内的相对路径，
 # lede 的 rust 包位置不同，改成从 TOPDIR 开始的绝对路径
