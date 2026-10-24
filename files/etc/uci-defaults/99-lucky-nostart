@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# 默认不自动启动 Lucky（首次开机执行一次，执行成功后被系统自动删除）
+#
+# 想恢复“默认开机自启”：删掉本文件重新编译固件，或者执行
+#       uci set lucky.@lucky[0].enabled='1'; uci commit lucky
+#
+
+[ -f /etc/config/lucky ] || exit 0
+uci -q get lucky.@lucky[0] > /dev/null 2>&1 || exit 0
+
+uci -q set lucky.@lucky[0].enabled='0'
+uci -q commit lucky
+echo "lucky: 默认不自动启动（enabled=0），需要时在 LuCI 里手动启动"
+
+exit 0
