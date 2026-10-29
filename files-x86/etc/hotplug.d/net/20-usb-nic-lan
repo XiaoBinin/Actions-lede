@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# 热插拔钩子：USB 以太网卡插上时并入 LAN
+# 由 /sbin/hotplug-call 在 net 子系统事件里 source 执行
+#
+# 只处理 add；拔掉（remove）不用管：网桥端口会随设备消失自动消失，
+# 配置里留着这个 port 也不会影响启动（下次插上还能直接用）。
+#
+[ "$ACTION" = "add" ] || exit 0
+[ -n "${INTERFACE:-}" ] || exit 0
+[ -x /usr/sbin/usb-nic-lan ] || exit 0
+
+# 已经是网桥端口/已配置的，usb-nic-lan 自己会跳过
+/usr/sbin/usb-nic-lan auto "$INTERFACE"

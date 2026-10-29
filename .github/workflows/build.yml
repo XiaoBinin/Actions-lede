@@ -243,6 +243,10 @@ jobs:
           if [ "$WITH_WIFI_DEFAULTS" = "true" ]; then
             bash "$GITHUB_WORKSPACE/scripts/wifi-settings.sh"
           fi
+          # x86 专用：插上 USB3 千兆网卡后自动并入 LAN（files-x86/ 下的脚本）
+          if [ "$PLATFORM" = "x86-64" ]; then
+            bash "$GITHUB_WORKSPACE/scripts/usb-nic-lan-install.sh"
+          fi
 
       - name: 预下载源码包
         working-directory: openwrt

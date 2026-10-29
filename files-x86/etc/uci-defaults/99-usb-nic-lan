@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# 首次开机：把已经插在机器上的 USB 以太网卡并入 LAN（执行后会被系统删除）
+#
+# 跑在 /etc/init.d/boot（S10）阶段，比 network（S20）早，
+# 所以这里只改 uci 不重载 network，等 network 启动时自然生效。
+#
+[ -x /usr/sbin/usb-nic-lan ] || exit 0
+
+USB_NIC_LAN_NO_RELOAD=1 /usr/sbin/usb-nic-lan auto
+
+exit 0

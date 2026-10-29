@@ -1,0 +1,212 @@
+#!/bin/sh
+#
+# usb-nic-lan —— 把 USB 以太网卡并入 LAN（br-lan）
+#
+# 只装在 x86 固件里（见 scripts/usb-nic-lan-install.sh）：
+#   * 开机时：/etc/uci-defaults/99-usb-nic-lan 扫一遍已经插着的 USB 网卡
+#   * 热插拔时：/etc/hotplug.d/net/20-usb-nic-lan 收到 add 事件就处理
+#   * 手动：usb-nic-lan status / add <dev>
+#
+# 判断"是 USB 网卡"的依据（全部满足）：
+#   1. /sys/class/net/<dev>/type = 1（Ethernet）
+#   2. 有 /sys/class/net/<dev>/device，且它的真实路径里有 /usb（PCI 网卡没有）
+#   3. 不是无线（已经是网桥端口的，会由 dev_in_network 判断后跳过）
+#   4. 名字没出现在 /etc/config/network 里（避免抢走 WAN 或用户自己配的接口）
+#
+# 加进 LAN 的方式（按现有配置自动选一种）：
+#   A. 已经有 br-lan 的 device 节 → 直接 add_list ports
+#   B. 老式 "option type 'bridge' + ifname" 写法 → add_list lan.ifname
+#   C. lan 还是单个物理网口（x86 常见）→ 新建 br-lan 桥，把原网口和 USB 网口都放进去
+#
+# 注意：方式 C 会让 LAN 短暂中断（网桥重建），所以是"插上 USB 网卡时"才发生一次。
+#
+set -u
+
+LOGTAG=usb-nic-lan
+# 是否需要重载 network 才能让改动生效（由 add_to_lan 置位）
+reload_needed=0
+
+log() {
+	logger -t "$LOGTAG" "$*" 2>/dev/null || true
+	echo "$*" >&2
+}
+
+# 是否是 USB 以太网卡
+# 注意：这里故意不排除"已经是网桥端口"的情况，否则 status 里会看不到已经加好的网卡；
+# 要不要跳过已经配置过的设备，由 dev_in_network() 判断。
+is_usb_ether() {
+	local dev="$1" path
+	[ -n "$dev" ] || return 1
+	[ -e "/sys/class/net/$dev" ] || return 1
+	[ -e "/sys/class/net/$dev/device" ] || return 1
+	[ "$(cat "/sys/class/net/$dev/type" 2>/dev/null)" = "1" ] || return 1
+	[ -d "/sys/class/net/$dev/wireless" ] && return 1
+	path="$(readlink -f "/sys/class/net/$dev/device" 2>/dev/null)" || return 1
+	case "$path" in
+		*/usb*) return 0 ;;
+	esac
+	return 1
+}
+
+# 设备名是否已经出现在 network 配置里（用带引号的精确匹配，避免 eth1 命中 eth10）
+dev_in_network() {
+	local dev="$1" v
+	uci -q show network 2>/dev/null | grep -qF "'$dev'" && return 0
+	for v in $(uci -q get network.lan.ifname 2>/dev/null) \
+	         $(uci -q get network.wan.ifname 2>/dev/null) \
+	         $(uci -q get network.wan6.ifname 2>/dev/null); do
+		[ "$v" = "$dev" ] && return 0
+	done
+	return 1
+}
+
+# 找 br-lan 对应的 device 节，输出像 network.@device[0] / network.lanbr
+brlan_section() {
+	uci -q show network 2>/dev/null \
+		| sed -n "s/^\(network\.[A-Za-z0-9_@][A-Za-z0-9_@\[\]-]*\)\.name='br-lan'$/\1/p" \
+		| head -n 1
+}
+
+reload_network() {
+	# 优先用 init 脚本（会等 netifd 把配置应用完），失败再退回 ubus
+	/etc/init.d/network reload >/dev/null 2>&1 && return 0
+	ubus call network reload >/dev/null 2>&1 && return 0
+	return 1
+}
+
+# 把 dev 加进 LAN
+# 成功返回 0；如果必须重载 network 才能生效，会置 reload_needed=1
+add_to_lan() {
+	local dev="$1" sec lan_device lan_ifname
+
+	sec="$(brlan_section)"
+	if [ -n "$sec" ]; then
+		uci -q add_list "$sec.ports=$dev" || return 1
+		uci -q commit network || return 1
+		log "已把 $dev 写入 ${sec}（br-lan）的 ports"
+		# 网桥已经起来了就直接热挂，避免 reload 把现有 LAN 端口（可能正连着 SSH）一起重建
+		if ip link set dev "$dev" up 2>/dev/null \
+		   && ip link set dev "$dev" master br-lan 2>/dev/null; then
+			log "$dev 已热挂到 br-lan（无需重载）"
+		else
+			reload_needed=1
+		fi
+		return 0
+	fi
+
+	lan_device="$(uci -q get network.lan.device)"
+	lan_ifname="$(uci -q get network.lan.ifname)"
+
+	# 老式写法：interface 自己就是 bridge（type bridge，端口在 ifname 里）
+	if [ "$(uci -q get network.lan.type)" = "bridge" ] \
+	   || { [ -z "$lan_device" ] && [ -n "$lan_ifname" ]; }; then
+		uci -q add_list "network.lan.ifname=$dev" || return 1
+		uci -q commit network || return 1
+		log "已把 $dev 追加到老式 bridge 的 network.lan.ifname"
+		if ip link set dev "$dev" up 2>/dev/null \
+		   && ip link set dev "$dev" master br-lan 2>/dev/null; then
+			log "$dev 已热挂到 br-lan（无需重载）"
+		else
+			reload_needed=1
+		fi
+		return 0
+	fi
+
+	# 新式写法：lan.device 必须是一个具体的物理口
+	case "$lan_device" in
+		'')
+			log "network.lan 没有 device 也没有 ifname，配置结构不认识，跳过 $dev"
+			return 1
+			;;
+		*' '*)
+			log "network.lan.device 是列表（$lan_device），配置结构不认识，跳过 $dev"
+			return 1
+			;;
+		br-lan)
+			log "lan 指向 br-lan 却找不到 device 节，配置结构不认识，跳过 $dev"
+			return 1
+			;;
+	esac
+
+	uci -q set network.lanbr='device'
+	uci -q set network.lanbr.name='br-lan'
+	uci -q set network.lanbr.type='bridge'
+	uci -q add_list "network.lanbr.ports=$lan_device" || return 1
+	uci -q add_list "network.lanbr.ports=$dev" || return 1
+	uci -q set network.lan.device='br-lan' || return 1
+	uci -q delete network.lan.ifname 2>/dev/null || true
+	uci -q delete network.lan.type 2>/dev/null || true
+	uci -q commit network || return 1
+	log "已把 lan（$lan_device）升级成 br-lan 网桥，并加入 $dev（需要重载 network）"
+	reload_needed=1
+	return 0
+}
+
+list_usb_nics() {
+	local d n
+	for d in /sys/class/net/*; do
+		n="${d##*/}"
+		is_usb_ether "$n" && echo "$n"
+	done
+}
+
+do_status() {
+	local dev speed state
+	for dev in $(list_usb_nics); do
+		speed="$(cat "/sys/class/net/$dev/speed" 2>/dev/null || echo '?')"
+		case "$speed" in
+			''|*-1|4294967295) speed="link down" ;;
+			*) speed="${speed} Mb/s" ;;
+		esac
+		if [ -e "/sys/class/net/$dev/brport" ]; then
+			state="已是网桥端口"
+		elif dev_in_network "$dev"; then
+			state="已在 network 配置里"
+		else
+			state="未配置"
+		fi
+		printf '%-10s %-12s %s\n' "$dev" "$speed" "$state"
+	done
+}
+
+do_auto() {
+	local only="${1:-}" dev speed
+	reload_needed=0
+	for dev in $(list_usb_nics); do
+		[ -z "$only" ] || [ "$only" = "$dev" ] || continue
+		if dev_in_network "$dev"; then
+			log "$dev 已经在 network 配置里，跳过"
+			continue
+		fi
+		if add_to_lan "$dev"; then
+			speed="$(cat "/sys/class/net/$dev/speed" 2>/dev/null || echo '?')"
+			log "USB 网卡 $dev（link ${speed}Mb/s）已并入 LAN"
+		fi
+	done
+	if [ "$reload_needed" = 1 ] && [ "${USB_NIC_LAN_NO_RELOAD:-0}" != "1" ]; then
+		reload_network || log "network 重载失败，下次重启会生效"
+	fi
+	return 0
+}
+
+case "${1:-auto}" in
+	status)
+		do_status
+		;;
+	auto)
+		do_auto "${2:-}"
+		;;
+		add)
+		[ -n "${2:-}" ] || { echo "用法: usb-nic-lan add <dev>" >&2; exit 2; }
+		is_usb_ether "$2" || { echo "$2 不是 USB 以太网卡" >&2; exit 1; }
+		dev_in_network "$2" && { echo "$2 已在 network 配置里" >&2; exit 0; }
+		reload_needed=0
+		if add_to_lan "$2"; then
+			[ "$reload_needed" = 1 ] && { reload_network || log "network 重载失败，下次重启会生效"; }
+		fi
+		;;
+	*)
+		echo "用法: usb-nic-lan [status|auto [dev]|add <dev>]" >&2
+		exit 2
+		;;
+esac
