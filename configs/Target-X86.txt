@@ -3,9 +3,6 @@ CONFIG_TARGET_x86=y
 CONFIG_TARGET_x86_64=y
 CONFIG_TARGET_x86_64_Generic=y
 
-# 设备列表
-# （x86 用 Generic 一个 profile 就够，所有小主机通用）
-
 # WIFI 驱动（x86 小主机外接 mt76 网卡用）
 CONFIG_PACKAGE_kmod-mt7915e=y
 CONFIG_PACKAGE_kmod-mt7921e=y

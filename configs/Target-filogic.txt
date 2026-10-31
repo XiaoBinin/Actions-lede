@@ -36,3 +36,6 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000=y
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_bananapi_bpi-r3 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_tplink_tl-xdr6086 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_tplink_tl-xtr8488 is not set
+
+# rootfs
+CONFIG_TARGET_ROOTFS_PARTSIZE=96

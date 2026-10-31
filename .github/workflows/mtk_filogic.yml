@@ -1,17 +1,14 @@
 #
-# MTK Filogic 平台（多设备 profile，一次编完，最容易撞 6 小时上限）
-# 定时已按原仓库注释掉，只能手动触发。
-#
-# 如果开始频繁超时，把 configs/Target-filogic.txt 按设备拆成 2~3 个文件，
-# 再用 matrix 分别调用 build.yml，最后从各次 Release 里取文件。
+# MTK Filogic 平台
+# 定时：每周三 20:00 UTC = 每周四 04:00 (Asia/Shanghai)
 #
 name: mtk_filogic
 
 on:
   repository_dispatch:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "0 20 * * 3"   # 每周四 04:00 (Asia/Shanghai)
+  schedule:
+    - cron: "0 20 * * 3"
 
 permissions:
   contents: write
@@ -30,11 +27,8 @@ jobs:
       configs: configs/Target-filogic.txt,configs/Packages-L.txt,configs/Packages-5G.txt
       clash_core: arm64
       vlmcsd: true
-      # 原 workflow 写了 CONFIG_5G 却从没执行 install-5G.sh，5G 包被 defconfig 静默丢掉；
-      # 现在打开这个开关，configs 里的 Packages-5G.txt 才真的生效。
       with_5g: true
-      homeproxy_rules: true
-      # 原仓库在这里没有改 WiFi 默认值的逻辑，保持关闭不改变现有固件行为。
+      # 原仓库在这里写了 WIFI_SETTINGS 却从未执行；现在改成显式开关。
       # 打开后默认 SSID=OWRT / 密码=87654321（见 scripts/wifi-settings.sh）。
       with_wifi_defaults: false
       build_mode: single

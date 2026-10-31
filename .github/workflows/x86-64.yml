@@ -1,8 +1,8 @@
 #
-# X86-64 平台（全量插件）
+# X86-64 平台
 # 定时：每周四 20:00 UTC = 每周五 04:00 (Asia/Shanghai)
 #
-name: x86-64
+name: X86-64
 
 on:
   repository_dispatch:
@@ -25,9 +25,8 @@ jobs:
     with:
       platform: x86-64
       branch: master
-      configs: configs/Target-X86.txt,configs/Packages.txt,configs/Packages-storage.txt,configs/Packages-5G.txt
+      configs: configs/Target-X86.txt,configs/Packages.txt,configs/Packages-5G.txt
       clash_core: amd64
       vlmcsd: false
       with_5g: true
-      homeproxy_rules: true
       build_mode: single

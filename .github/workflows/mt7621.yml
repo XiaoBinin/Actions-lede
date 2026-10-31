@@ -1,14 +1,14 @@
 #
 # ramips MT7621 平台（极简，只有 homeproxy + design 主题）
-# 定时已按原仓库注释掉，只能手动触发。
+# 定时：每周一 20:00 UTC = 每周二 04:00 (Asia/Shanghai)
 #
 name: mt7621
 
 on:
   repository_dispatch:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "0 18 * * 3"   # 每周四 02:00 (Asia/Shanghai)
+  schedule:
+    - cron: "0 20 * * 1"
 
 permissions:
   contents: write
@@ -30,5 +30,4 @@ jobs:
       # 原 workflow 没替换 vlmcsd（用的是 feed 自带版本），保持原样
       vlmcsd: false
       with_5g: false
-      homeproxy_rules: true
       build_mode: single

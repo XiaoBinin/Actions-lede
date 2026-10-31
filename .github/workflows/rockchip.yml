@@ -28,5 +28,4 @@ jobs:
       clash_core: arm64
       vlmcsd: true
       with_5g: true
-      homeproxy_rules: true
       build_mode: single

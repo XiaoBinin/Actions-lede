@@ -2,10 +2,6 @@
 # 可复用编译流程（reusable workflow）
 #
 # 各平台 workflow 通过 workflow_call 调用本文件，平台差异全部由 inputs 描述。
-# 之前 6 份 ~200 行的 workflow 各自维护，改一处要改 6 遍，而且已经出现了不一致：
-#   * mtk_filogic 选了 5G 的包却从来没装过 qmodem feed（包被 defconfig 静默丢掉）
-#   * r1pluslts-docker 和 rockchip 用同一个缓存 key（互相覆盖、互相删缓存）
-#   * 只有 allwinner / mtk_filogic 用第三方 cachewrtbuild，其余用 actions/cache
 #
 # 相比原版的改动：
 #   * configs 中任意文件不存在 -> 立即失败（原来会静默丢掉平台配置，编出错平台的固件）
@@ -45,11 +41,6 @@ on:
         required: false
         type: boolean
         default: false
-      homeproxy_rules:
-        description: "是否预置 homeproxy 规则库并改默认 DNS"
-        required: false
-        type: boolean
-        default: true
       with_wifi_defaults:
         description: "是否改写默认 WiFi SSID/密码（默认关闭，避免悄悄改变固件默认值）"
         required: false
@@ -100,14 +91,13 @@ jobs:
             echo "| 编译方式 | \`${{ inputs.build_mode }}\` |"
             echo "| OpenClash 内核 | \`${{ inputs.clash_core }}\` |"
             echo "| vlmcsd 覆盖 | \`${{ inputs.vlmcsd }}\` |"
-            echo "| homeproxy 规则 | \`${{ inputs.homeproxy_rules }}\` |"
             echo "| 5G (QModem) | \`${{ inputs.with_5g }}\` |"
             echo "| 改默认 WiFi | \`${{ inputs.with_wifi_defaults }}\` |"
             echo "| Release tag | \`${{ steps.meta.outputs.release_tag }}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: 检出仓库
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: 清理磁盘
         run: bash scripts/free_disk_space.sh
@@ -141,7 +131,7 @@ jobs:
       # key / path 跟旧版完全一致（除 r1pluslts 换成了自己的前缀），所以历史缓存照样能命中。
       - name: 恢复缓存
         id: cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           # 按"平台-分支-周"做 key：同一周内命中精确缓存，跨周靠 restore-keys 兜底。
           # 原来用 commit hash 做 key，上游一提交就必然 miss。
@@ -205,7 +195,6 @@ jobs:
           CLASH_CORE: ${{ inputs.clash_core }}
           WITH_VLMCSD: ${{ inputs.vlmcsd }}
           WITH_5G: ${{ inputs.with_5g }}
-          HOMEPROXY_RULES: ${{ inputs.homeproxy_rules }}
           WITH_WIFI_DEFAULTS: ${{ inputs.with_wifi_defaults }}
         run: |
           set -euo pipefail
@@ -227,10 +216,7 @@ jobs:
           bash "$GITHUB_WORKSPACE/scripts/init-settings.sh"
           bash "$GITHUB_WORKSPACE/scripts/target-patches.sh" "$PLATFORM"
           bash "$GITHUB_WORKSPACE/scripts/packages.sh"
-          # homeproxy 必须在 packages.sh 之后：packages.sh 会重装 feeds 里的那一份
-          if [ "$HOMEPROXY_RULES" = "true" ]; then
-            bash "$GITHUB_WORKSPACE/scripts/homeproxy.sh"
-          fi
+          bash "$GITHUB_WORKSPACE/scripts/homeproxy.sh"
           if [ "$WITH_5G" = "true" ]; then
             bash "$GITHUB_WORKSPACE/scripts/install-5G.sh"
           fi
@@ -305,7 +291,7 @@ jobs:
 
       - name: 保存缓存（编译失败也存）
         if: ${{ !cancelled() && steps.cache-check.outputs.ready == '1' }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           key: ${{ steps.cache.outputs.cache-primary-key }}
           path: |

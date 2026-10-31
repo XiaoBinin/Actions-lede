@@ -1,11 +1,11 @@
 name: Auto-Clean
 
 # 用 gh CLI 直接清理，不再依赖 ophub/delete-releases-workflows@main 这种浮动引用的第三方 action
-# 定时：每周六 20:00 UTC = 每周日 04:00 (Asia/Shanghai)
+# 定时：每周六 22:00 UTC = 每周日 06:00 (Asia/Shanghai)
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 20 * * 6"
+    - cron: "0 22 * * 6"
 
 permissions:
   contents: write
