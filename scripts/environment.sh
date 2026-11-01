@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# 安装 immortalwrt / OpenWrt 编译依赖
+#
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive

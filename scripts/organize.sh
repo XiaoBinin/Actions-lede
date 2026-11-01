@@ -5,12 +5,6 @@
 #
 # 依赖环境变量: GITHUB_WORKSPACE / GITHUB_ENV / BRANCH / WRT_HASH / KERNEL_VERSION(可选)
 #
-# 与原 workflow 的区别（这些逻辑原来散在 6 个 yml 的"整理文件/固件重命名"步骤里）：
-#   * 产物目录不是恰好一个就直接报错（原来 `cd openwrt/bin/targets/*/*` 在多个目录时行为不确定）
-#   * 重命名后**重算 sha256sums**。原来只删不改，重命名完 sha256sums 里还是旧文件名，
-#     用户照着校验必然对不上
-#   * 各平台"删哪些文件"集中在一处，仍然保留原仓库的取舍（见下面的 case）
-#
 set -euo pipefail
 shopt -s nullglob
 
@@ -35,7 +29,7 @@ find . -maxdepth 1 -type f \
   \( -name '*.buildinfo' -o -name '*.json' -o -name '*.manifest' -o -name 'sha256sums' \) -delete
 rm -rf ./packages
 
-# 2. 按平台决定删哪些文件、去掉哪个文件名前缀
+# 2. 按平台决定保留哪些文件、去掉哪个文件名前缀
 PREFIX=""
 case "$PLATFORM" in
   x86-64)
@@ -68,14 +62,14 @@ if [ -n "$PREFIX" ]; then
   for f in *; do
     [ -f "$f" ] || continue
     case "$f" in
-      "$PREFIX"*)
-        mv -v -- "$f" "${f#"$PREFIX"}"
+      *"$PREFIX"*)
+        mv -v -- "$f" "${f//"$PREFIX"/}"
         ;;
     esac
   done
 fi
 
-# 4. 重命名之后原来的 sha256sums 已经对不上，重算一份
+# 4. 重命名后原来的 sha256sums 已经对不上，重算一份
 {
   for f in *; do
     [ -f "$f" ] || continue
@@ -100,7 +94,7 @@ esac
 case "$PLATFORM" in
   x86-64)    NOTE="写 U 盘或硬盘都行。" ;;
   allwinner) NOTE="能插内存卡的写内存卡，eMMC 的用官方工具写入。" ;;
-  rockchip)  NOTE="如出现不稳定，可尝试降低 CPU 频率（已移除 lede 的 991 超频补丁，仍可能个别板子不兼容）。" ;;
+  rockchip)  NOTE="如出现不稳定，可尝试降低 CPU 频率（已移除 rk3328 的 991 超频补丁，仍可能个别板子不兼容）。" ;;
   r1pluslts) NOTE="仅适用香橙派 R1 Plus / R1 Plus LTS，已内置 docker。" ;;
   mt7621)    NOTE="先刷好不死 bootloader，再刷 factory.bin，之后用 squashfs-sysupgrade.bin 升级。" ;;
   filogic)   NOTE="首次刷机需要 preloader(bl2) / gpt(部分机型) / bl31-uboot.fip，按机型说明顺序刷。" ;;

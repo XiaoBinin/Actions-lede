@@ -3,17 +3,12 @@
 # 在 openwrt 源码根目录执行编译
 # 用法: build.sh <single|staged> [jobs]
 #
-#   single = 一次 make -jN 编完（默认，平时都用这个）
-#   staged = tools / toolchain / kernel / package / target 分开编，中间清磁盘
-#            （磁盘更省、总时间更长，留给设备特别多的平台手动用）
-#
 set -euo pipefail
 
 MODE="${1:-single}"
 JOBS="${2:-$(nproc)}"
 
-# 并行失败就退回 -j1 V=s 重编，拿到可读的报错（原逻辑保留，只是抽成函数，
-# 不再在每个 workflow 里抄一遍）
+# 并行失败就退回 -j1 V=s 重编，拿到可读的报错（原逻辑保留，只是抽成函数）
 build() {
   if make -j"${JOBS}" "$@"; then
     return 0

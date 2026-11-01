@@ -30,7 +30,7 @@ fetch() {
     exit 1
   fi
   if [ ! -s "${out}.part" ]; then
-    echo "::error::下载内容为空: ${url}" >&2
+    echo "::error::下载失败或内容为空: ${url}" >&2
     rm -f "${out}.part"
     exit 1
   fi
