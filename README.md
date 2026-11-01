@@ -2,8 +2,6 @@
 
 > 用 GitHub Actions 编译 [coolsnowwolf/lede](https://github.com/coolsnowwolf/lede)（Lean's OpenWrt）固件。
 >
-> 目录结构照 `Actions-immortalwrt-optimized` 改成了「1 份 reusable workflow + 每个平台一个 20~40 行的调用方」。
-> 具体改了什么、为什么改、哪些地方我**故意没动**，都写在 [优化说明.md](优化说明.md) 里，建议先看那个。
 
 ---
 
@@ -19,7 +17,7 @@
 | `configs/Packages*.txt` | 插件配置（`Packages.txt` 全量 / `Packages-L.txt` 精简 / `Packages-5G.txt` 5G / `Packages-storage.txt` 存储） |
 | `files/etc` | 随固件下发的内置配置（目前是 smartdns） |
 | `patches/vlmcsd` | 覆盖 feeds 里的 vlmcsd |
-| `patches/r1pluslts` | R1 Plus LTS 的 dts（**当前没有接线**，见优化说明） |
+| `patches/r1pluslts` | R1 Plus LTS 的 dts（**当前没有使用**，6.18内核后可以不用了） |
 | `scripts/` | 各个构建阶段的脚本，全部约定"在 openwrt 源码根目录执行" |
 | `doc/` | README 用的截图 |
 
@@ -36,8 +34,7 @@
 | 周日 04:00 | — | `Auto-Clean.yml`（清理 Release/流水线记录） | — | — |
 
 `mtk_filogic.yml`（MTK Filogic）和 `mt7621.yml`（ramips MT7621）的定时**保持原样：已注释掉**，
-只能手动 `workflow_dispatch` 触发。Filogic 设备多、一次全编很容易撞 6 小时上限；
-MT7621 在原作者那里也是停掉定时的，这里不擅自恢复。
+只能手动 `workflow_dispatch` 触发。
 
 ---
 
@@ -46,14 +43,13 @@ MT7621 在原作者那里也是停掉定时的，这里不擅自恢复。
 | workflow | platform | branch | configs | OpenClash 内核 | vlmcsd | 5G | homeproxy 规则 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | `x86-64.yml` | `x86-64` | master | Target-X86 + Packages + Packages-storage + Packages-5G | amd64 | ✓ | ✓ | ✓ |
-| `allwinner.yml` | `allwinner` | master | Target-allwinner + Packages-L + Packages-5G | arm64 | ✓ | ✓ | ✓ |
+| `allwinner.yml` | `allwinner` | master | Target-allwinner + Packages + Packages-5G | arm64 | ✓ | ✓ | ✓ |
 | `rockchip.yml` | `rockchip` | master | Target-rockchip-L + Packages + Packages-5G | arm64 | ✓ | ✓ | ✓ |
 | `r1pluslts-docker.yml` | `r1pluslts` | master | Target-r1-docker + Packages + Packages-5G | arm64 | ✓ | ✓ | ✓ |
-| `mtk_filogic.yml` | `filogic` | master | Target-filogic + Packages-L + Packages-5G | arm64 | ✓ | ✓ | ✓ |
+| `mtk_filogic.yml` | `filogic` | master | Target-filogic + Packages-L + Packages-5G | arm64 | ✓ | — | ✓ |
 | `mt7621.yml` | `mt7621` | master | 仅 Target-mt7621 | 无 | — | — | ✓ |
 
-> `platform` 同时决定缓存 key、产物重命名前缀和 Release 标题，见 `scripts/organize.sh`。
-> `configs` 里任何一个文件不存在，流水线**第一步就会失败**并报出文件名（以前是静默丢掉配置，编出错平台的固件）。
+
 
 ---
 
@@ -91,18 +87,9 @@ Filogic 有 27 个设备 profile，一次全编容易逼近单 job 6 小时上�
 
 **Allwinner、Rockchip** 平台：能插内存卡的写内存卡，eMMC 的用官方工具写入。
 
-**MT7621**：先刷好不死 bootloader，再刷 `-factory.bin`，之后用 `-squashfs-sysupgrade.bin` 升级。
+**MT7621** 平台：先刷好不死 bootloader，再刷 `-factory.bin`，之后用 `-squashfs-sysupgrade.bin` 升级。
 
-**MTK Filogic** 平台最麻烦，需要按顺序刷：
-
-- `-gpt.bin`：部分大容量机型有，第一次要刷
-- `-preloader.bin`：即 **bl2**，第一次必须刷
-- `-bl31-uboot.fip`：即 **uboot**，不刷刷不了固件
-- 之后的升级用 `-squashfs-sysupgrade.itb`
-
-> 优化版 Release 会**保留** `preloader / gpt / bl31-uboot.fip`，只删体积大的 initramfs 内核
-> （`*-kernel.bin`），其余杂项（buildinfo / manifest / packages / 旧 sha256sums）都清掉。
-> 初始固件建议从 [ImmortalWrt Firmware Selector](https://firmware-selector.immortalwrt.org/) 下。
+**MTK Filogic** 平台：先刷好初始固件再刷这里编译出来的新固件
 
 ![github3](doc/github3.png)
 
@@ -111,8 +98,8 @@ Filogic 有 27 个设备 profile，一次全编容易逼近单 job 6 小时上�
 ## 其他
 
 - 默认 IP：**192.168.8.1**
-- smartdns：配置已预置（`files/etc/config/smartdns`），但主实例**默认关闭**（`enabled '0'`），
-  海外分组端口 **6553**。要用请在 LuCI「服务 → SmartDNS」里启用，否则看起来会像"坏了"。
+- smartdns：配置已预置（`files/etc/config/smartdns`），但**默认关闭**，
+  海外分组端口 **6553**。要用请在 LuCI「服务 → SmartDNS」里启用。
 - OpenClash 的 mihomo 内核和 GeoIP/GeoSite/Country.mmdb 已预置进固件（`clash_core` 开的时候）。
 - homeproxy 的规则库（Loyalsoldier/surge-rules）和默认 DoH 已预置，见 `scripts/homeproxy.sh`。
 - passwall + smartdns（海外端口 6553）的配置示意：
